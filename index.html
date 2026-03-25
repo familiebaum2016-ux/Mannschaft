@@ -3,74 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mannschaftsmanager | Dart</title>
+    <title>Dart Manager | Tim Baum</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         :root { --primary: #c0392b; --dark: #1e272e; --accent: #f1c40f; }
-        body { font-family: 'Segoe UI', sans-serif; background: #2d3436; margin: 0; color: white; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #2d3436; margin: 0; color: white; }
         header { background: #1e272e; padding: 20px; border-bottom: 3px solid var(--accent); text-align: center; }
         .container { max-width: 1100px; margin: 20px auto; padding: 10px; }
-        #auth-container { max-width: 400px; margin: 50px auto; background: #34495e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); text-align: center; }
-        input, select { padding: 10px; border-radius: 5px; border: none; margin: 5px; width: 85%; box-sizing: border-box; }
-        button { padding: 10px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; background: var(--primary); color: white; }
-        .card { background: white; color: black; padding: 20px; border-radius: 10px; margin-top: 20px; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 600px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background: #f2f2f2; font-size: 0.8rem; }
-        .month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; }
-        label { font-size: 0.6rem; display: block; }
+        
+        /* Login Bereich */
+        #auth-container { max-width: 380px; margin: 60px auto; background: #34495e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        input, select { padding: 12px; border-radius: 5px; border: none; margin: 8px 0; width: 100%; box-sizing: border-box; font-size: 1rem; }
+        button { padding: 12px 20px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; background: var(--primary); color: white; transition: 0.3s; width: 100%; margin-top: 10px; }
+        button:hover { opacity: 0.8; }
+
+        /* App Inhalt */
+        .card { background: white; color: black; padding: 20px; border-radius: 10px; margin-top: 20px; overflow-x: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        h3 { margin-top: 0; color: #2d3436; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 650px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background: #f8f9fa; color: #333; font-size: 0.85rem; text-transform: uppercase; }
+        
+        .month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+        .month-item { display: flex; flex-direction: column; align-items: center; font-size: 0.65rem; }
+        .month-item input { width: 18px; height: 18px; cursor: pointer; margin: 2px 0; }
+
+        .btn-small { width: auto; padding: 5px 10px; margin: 0 2px; }
+        .btn-del { background: #636e72; font-size: 0.8rem; }
+        .btn-upd { background: #27ae60; min-width: 35px; }
+        .btn-down { background: #e67e22; min-width: 35px; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1 style="color:var(--accent); margin:0;">DART-MANNSCHAFTSMANAGER</h1>
+    <h1 style="color:var(--accent); margin:0; letter-spacing: 2px;">DART-MANNSCHAFTSMANAGER</h1>
 </header>
 
 <div class="container">
     <div id="auth-container">
-        <h3>LOGIN</h3>
-        <input type="email" id="email" placeholder="E-Mail" value="tim.baum210690@gmail.com">
+        <h2 style="color:white; margin-bottom:20px;">ANMELDUNG</h2>
+        <input type="email" id="email" value="tim.baum210690@gmail.com" placeholder="E-Mail">
         <input type="password" id="password" placeholder="Passwort">
         <button id="loginBtn">EINLOGGEN</button>
     </div>
 
     <div id="app-content" style="display:none;">
-        <div style="text-align:right; margin-bottom: 10px;">
-            <button onclick="firebase.auth().signOut()" style="background:grey; padding: 5px 10px;">Abmelden</button>
+        
+        <div class="card">
+            <h3>NEUEN SPIELER ANLEGEN</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <input type="text" id="playerName" placeholder="Vorname Nachname" style="flex: 2; min-width: 200px;">
+                <input type="date" id="playerBirth" style="flex: 1; min-width: 150px;">
+                <select id="playerSize" style="flex: 1; min-width: 120px;">
+                    <option value="">Trikotgröße</option>
+                    <option value="S">S</option><option value="M">M</option><option value="L">L</option>
+                    <option value="XL">XL</option><option value="XXL">XXL</option>
+                </select>
+                <button onclick="addPlayer()" style="flex: 1; min-width: 150px; margin-top: 8px;">SPEICHERN</button>
+            </div>
         </div>
 
         <div class="card">
-            <h3>NEUEN SPIELER HINZUFÜGEN</h3>
-            <input type="text" id="playerName" placeholder="Vorname Nachname">
-            <input type="date" id="playerBirth">
-            <select id="playerSize">
-                <option value="">Trikotgröße</option>
-                <option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option>
-            </select>
-            <button onclick="addPlayer()">HINZUFÜGEN</button>
-        </div>
-
-        <div class="card">
-            <h3>SPIELERLISTE</h3>
+            <h3>AKTUELLE MANNSCHAFT</h3>
             <table>
-                <thead>
+<thead>
                     <tr>
-                        <th>Name / Info</th>
+                        <th>Spieler / Info</th>
                         <th>Felgen</th>
-                        <th>Beitrag (Jan - Dez)</th>
-                        <th>Aktion</th>
+                        <th>Beiträge (Jan - Dez)</th>
+                        <th>Verwalten</th>
                     </tr>
                 </thead>
                 <tbody id="playerTableBody"></tbody>
             </table>
+            <div style="margin-top: 25px; text-align: center;">
+                <button onclick="firebase.auth().signOut()" style="background:#7f8c8d; width: 200px;">ABMELDEN</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
+    // Deine Firebase Konfiguration
     const firebaseConfig = {
         apiKey: "AIzaSyBMtWxbRPX4hBtBPi-Yn6uYt6I-ud5SyY8",
         authDomain: "mannschaftsmanager.firebaseapp.com",
@@ -80,102 +98,128 @@
         appId: "1:332675116491:web:9e0097d48023fb123b5a4e"
     };
 
+    // Firebase Initialisierung
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    // Login (Exakt dein funktionierender Weg)
-    document.getElementById('loginBtn').addEventListener('click', () => {
-const email = document.getElementById('email').value.trim();
+    // Login Event (Absolut stabil)
+    document.getElementById('loginBtn').onclick = function() {
+        const mail = document.getElementById('email').value.trim();
         const pass = document.getElementById('password').value;
-        auth.signInWithEmailAndPassword(email, pass).catch(err => alert("Fehler: " + err.message));
-    });
+        auth.signInWithEmailAndPassword(mail, pass).catch(err => {
+            alert("Login fehlgeschlagen: " + err.message);
+        });
+    };
 
+    // Status Überprüfung (Zeigt App erst wenn Login okay)
     auth.onAuthStateChanged(user => {
+        const authDiv = document.getElementById('auth-container');
+        const appDiv = document.getElementById('app-content');
         if (user) {
-            document.getElementById('auth-container').style.display = 'none';
-            document.getElementById('app-content').style.display = 'block';
-            loadPlayers();
+            authDiv.style.display = 'none';
+            appDiv.style.display = 'block';
+            loadPlayers(); // Startet erst wenn eingeloggt!
         } else {
-            document.getElementById('auth-container').style.display = 'block';
-            document.getElementById('app-content').style.display = 'none';
+            authDiv.style.display = 'block';
+            appDiv.style.display = 'none';
         }
     });
 
+    // Spieler in Datenbank speichern
     async function addPlayer() {
-        const name = document.getElementById('playerName').value;
+        const nameInput = document.getElementById('playerName');
+        const name = nameInput.value.trim();
         const birth = document.getElementById('playerBirth').value;
         const size = document.getElementById('playerSize').value;
-        if (!name) return;
+
+        if (!name) { alert("Bitte einen Namen eingeben!"); return; }
+
         try {
             await db.collection("players").add({
                 name: name,
-                birth: birth,
-                size: size,
+                birth: birth || "",
+                size: size || "",
                 felgen: 0,
                 months: new Array(12).fill(false),
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-            document.getElementById('playerName').value = "";
+            // Felder leeren
+            nameInput.value = "";
             document.getElementById('playerBirth').value = "";
             document.getElementById('playerSize').value = "";
-        } catch (e) { alert("Fehler: " + e.message); }
+        } catch (e) {
+            alert("Fehler beim Speichern: " + e.message);
+        }
     }
 
+    // Spielerliste laden & Live-Update
     function loadPlayers() {
         db.collection("players").orderBy("createdAt", "asc").onSnapshot(snapshot => {
             const tbody = document.getElementById('playerTableBody');
+            if(!tbody) return;
             tbody.innerHTML = "";
+
             snapshot.forEach(doc => {
                 const p = doc.data();
                 const id = doc.id;
-                const monate = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
                 
-                let monthHtml = '<div class="month-grid">';
+                // Monat-Checkboxes bauen
+                const mShorts = ["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
+                let mHtml = '<div class="month-grid">';
                 for(let i=0; i<12; i++) {
-                    monthHtml += `
-                        <div>
-                            <label>${monate[i]}</label>
-                            <input type="checkbox" ${p.months && p.months[i] ? 'checked' : ''} 
-                            onclick="toggleMonth('${id}', ${i})">
+                    const isChecked = (p.months && p.months[i]) ? 'checked' : '';
+                    mHtml += `
+                        <div class="month-item">
+                            <label>${mShorts[i]}</label>
+                            <input type="checkbox" ${isChecked} onclick="toggleMonth('${id}', ${i})">
                         </div>`;
                 }
-                monthHtml += '</div>';
+mHtml += '</div>';
 
+                // Tabellenzeile (Abgesichert gegen fehlende Daten mit || )
                 tbody.innerHTML += `
                     <tr>
                         <td style="text-align:left;">
-                            <strong>${p.name}</strong><br>
-                            <small>${p.birth  '-'} | Gr: ${p.size  '-'}</small>
+                            <span style="font-size: 1.1rem; font-weight: bold;">${p.name}</span><br>
+                            <span style="color: #666; font-size: 0.85rem;">🎂 ${p.birth  'n.A.'} | 👕 Gr: ${p.size  'n.A.'}</span>
                         </td>
                         <td>
-                            <button style="background:#e67e22;" onclick="updateFelgen('${id}', ${p.felgen - 1})">-</button>
-                            <span style="font-weight:bold; margin:0 5px;">${p.felgen || 0}</span>
-                            <button style="background:#27ae60;" onclick="updateFelgen('${id}', ${p.felgen + 1})">+</button>
+                            <button class="btn-small btn-down" onclick="changeFelgen('${id}', ${(p.felgen || 0) - 1})">-</button>
+                            <span style="font-size: 1.2rem; font-weight: bold; margin: 0 8px;">${p.felgen || 0}</span>
+                            <button class="btn-small btn-upd" onclick="changeFelgen('${id}', ${(p.felgen || 0) + 1})">+</button>
                         </td>
-                        <td>${monthHtml}</td>
-                        <td><button style="background:#c0392b; padding:5px;" onclick="deletePlayer('${id}')">X</button></td>
+                        <td>${mHtml}</td>
+                        <td>
+                            <button class="btn-small btn-del" onclick="deletePlayer('${id}', '${p.name}')">Löschen</button>
+                        </td>
                     </tr>
                 `;
             });
+        }, err => {
+            console.error("Snapshot Fehler:", err);
         });
     }
 
-    async function updateFelgen(id, val) {
+    // Hilfsfunktionen
+    async function changeFelgen(id, val) {
         if(val < 0) val = 0;
         await db.collection("players").doc(id).update({ felgen: val });
     }
 
     async function toggleMonth(id, index) {
-        const docRef = db.collection("players").doc(id);
-        const doc = await docRef.get();
-        let months = doc.data().months || new Array(12).fill(false);
-        months[index] = !months[index];
-        await docRef.update({ months: months });
+        const ref = db.collection("players").doc(id);
+        const doc = await ref.get();
+        if(!doc.exists) return;
+        let m = doc.data().months || new Array(12).fill(false);
+        m[index] = !m[index];
+        await ref.update({ months: m });
     }
 
-    async function deletePlayer(id) {
-        if(confirm("Spieler löschen?")) await db.collection("players").doc(id).delete();
+    async function deletePlayer(id, name) {
+        if(confirm("Soll " + name + " wirklich gelöscht werden?")) {
+            await db.collection("players").doc(id).delete();
+        }
     }
 </script>
 </body>
