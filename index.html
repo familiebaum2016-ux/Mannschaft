@@ -22,26 +22,19 @@
         input { padding: 12px; border-radius: 8px; border: none; margin-bottom: 10px; width: 100%; box-sizing: border-box; font-size: 1rem; }
         button { padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; text-transform: uppercase; }
         .btn-main { background: var(--primary); color: white; }
-        .btn-main:hover { background: #a93226; }
         
         .nav-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .nav-tab { padding: 10px 15px; cursor: pointer; background: #57606f; border-radius: 8px; color: white; font-weight: bold; }
         .nav-tab.active { background: var(--primary); }
         
-        .container { background: white; padding: 25px; border-radius: 15px; color: #2d3436; display: none; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .container { background: white; padding: 25px; border-radius: 15px; color: #2d3436; display: none; text-align: left; }
         .container.active { display: block; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px 8px; border-bottom: 1px solid #eee; text-align: left; font-size: 0.9rem; }
-        th { background: #f8f9fa; color: #7f8c8d; }
-        
         .badge { padding: 3px 6px; border-radius: 4px; font-size: 0.7rem; background: #dfe6e9; margin: 1px; display: inline-block; font-weight: bold; }
         .badge.paid { background: #2ecc71; color: white; }
-        
         .edit-card { background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd; }
-        .month-grid-edit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 5px; }
-        
-        #logoutBtn { background: #ff7675; width: auto; padding: 5px 15px; font-size: 0.7rem; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -50,51 +43,48 @@
     <img src="logo.png" alt="Logo" class="logo-img">
     <h1>Mannschaftsmanager</h1>
     <div class="credits">Entwickelt von <strong>Tim Baum</strong></div>
-    <button onclick="logout()" id="logoutBtn" style="display:none;">Abmelden</button>
+    <button onclick="logout()" id="logoutBtn" style="display:none; width:auto; background:#ff7675; font-size:0.7rem;">Abmelden</button>
 </header>
 
 <div id="auth-container">
-    <h2 id="auth-title">DART-FREUNDE ZUGANG</h2>
+    <h2>DART-FREUNDE ZUGANG</h2>
     <input type="email" id="email" placeholder="E-Mail">
     <input type="password" id="password" placeholder="Passwort">
     <button class="btn-main" onclick="handleAuth()">Login / Registrieren</button>
-    <p style="font-size: 0.75rem; color: #b2bec3; margin-top: 15px;">Noch kein Konto? Einfach Daten eingeben und auf Registrieren klicken.</p>
 </div>
 
 <div id="app-content">
     <div class="nav-tabs">
         <div class="nav-tab active" onclick="showTab('add-tab', this)">SPIELER +</div>
-<div id="kader-nav" class="nav-tab" onclick="showTab('kader-tab', this)">KADER</div>
+        <div class="nav-tab" onclick="showTab('kader-tab', this)">KADER</div>
         <div class="nav-tab" onclick="showTab('edit-tab', this)">BEARBEITEN</div>
     </div>
 
     <div id="add-tab" class="container active">
-        <h3>Neuen Dart-Spieler hinzufügen</h3>
-        <input type="text" id="pName" placeholder="Name des Spielers">
+        <h3>Neuer Spieler</h3>
+        <input type="text" id="pName" placeholder="Name">
         <button class="btn-main" onclick="addPlayer()">Hinzufügen</button>
     </div>
 
     <div id="kader-tab" class="container">
-        <h3>📋 Aktueller Kader</h3>
+        <h3>Kader-Übersicht</h3>
         <div style="overflow-x: auto;">
             <table>
-                <thead>
-                    <tr><th>Name</th><th>Monate bezahlt</th><th>Felgen</th><th>Geburtstag</th><th>Größe</th></tr>
-                </thead>
+<thead><tr><th>Name</th><th>Beiträge</th><th>Felgen</th><th>Geburtstag</th></tr></thead>
                 <tbody id="kaderBody"></tbody>
             </table>
         </div>
     </div>
 
     <div id="edit-tab" class="container">
-        <h3>📝 Daten & Felgen verwalten</h3>
+        <h3>Verwalten</h3>
         <div id="editContainer"></div>
-        <button class="btn-main" onclick="saveToCloud()" style="background:#2d3436; margin-top:20px;">Änderungen in Cloud speichern</button>
+        <button class="btn-main" onclick="saveToCloud()" style="background:#2d3436; margin-top:20px;">In Cloud speichern</button>
     </div>
 </div>
 
 <script>
-    // --- DEINE FIREBASE DATEN (VOM FOTO) ---
+    // DEINE DATEN VOM FOTO
     const firebaseConfig = {
         apiKey: "AIzaSyBDivWSuOeTQqZJVJQshWGIxM1xifbh9-kA",
         authDomain: "mannschaftsmanager.firebaseapp.com",
@@ -104,6 +94,7 @@
         appId: "1:332675116491:web:9e0097d48023fb123b5a4e"
     };
 
+    // INITIALISIERUNG ZUERST!
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -112,11 +103,11 @@
     let players = [];
     const months = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"];
 
-    // AUTH LOGIN LOGIK
+    // AUTH FUNKTIONEN
     async function handleAuth() {
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
-        if(!email || !pass) return alert("Bitte E-Mail und Passwort eingeben!");
+        if(!email || !pass) return alert("Bitte alles ausfüllen!");
         try {
             await auth.signInWithEmailAndPassword(email, pass);
         } catch (e) {
@@ -136,13 +127,11 @@
         } else {
             document.getElementById('auth-container').style.display = 'block';
             document.getElementById('app-content').style.display = 'none';
-            document.getElementById('logoutBtn').style.display = 'none';
         }
     });
 
     function logout() { auth.signOut(); }
 
-    // DATEN LADEN / SPEICHERN
     async function loadData() {
         const doc = await db.collection('users').doc(currentUser.uid).get();
         if(doc.exists) { players = doc.data().players || []; updateUI(); }
@@ -150,11 +139,10 @@
 
     async function saveToCloud() {
         await db.collection('users').doc(currentUser.uid).set({ players });
-        alert("Daten erfolgreich gesichert!");
+        alert("Gespeichert!");
         updateUI();
     }
 
-    // SPIELER FUNKTIONEN
     function addPlayer() {
         const name = document.getElementById('pName').value.trim();
         if(!name) return;
@@ -163,70 +151,36 @@
         saveToCloud();
     }
 
-    function updateUI() { renderKader(); renderEdit(); }
-
-    function renderKader() {
+    function updateUI() {
         const body = document.getElementById('kaderBody');
-        body.innerHTML = players.map(p => `
-            <tr>
-                <td><strong>${p.name}</strong></td>
-                <td>${months.map((m, i) => `<span class="badge ${p.
-monthsPaid.includes(i) ? 'paid' : ''}">${m}</span>`).join('')}</td>
-                <td style="color:#2ecc71; font-weight:bold;">${p.felgen}</td>
-                <td>${p.birth || '-'}</td>
-                <td>${p.size || '-'}</td>
-            </tr>
-        `).join('');
-    }
-
-    function renderEdit() {
-        const container = document.getElementById('editContainer');
-        container.innerHTML = players.map(p => `
+        body.innerHTML = players.map(p => `<tr><td>${p.name}</td><td>${months.map((m, i) => `<span class="badge ${p.monthsPaid.includes(i) ? 'paid' : ''}">${m}</span>`).join('')}</td><td>${p.felgen}</td><td>${p.birth || '-'}</td></tr>`).join('');
+        
+        const edit = document.getElementById('editContainer');
+        edit.innerHTML = players.map(p => `
             <div class="edit-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <strong style="font-size:1.1rem; color:#c0392b;">${p.name}</strong>
-                    <button onclick="delP(${p.id})" style="background:none; color:red; width:auto; font-size:0.8rem;">Löschen</button>
-                </div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:10px;">
-                    <div>
-                        <small>Beiträge bezahlt:</small>
-                        <div class="month-grid-edit">
-                            ${months.map((m, i) => `<label style="font-size:0.65rem;"><input type="checkbox" ${p.monthsPaid.includes(i) ? 'checked' : ''} onchange="toggleM(${p.id}, ${i})"> ${m}</label>`).join('')}
-                        </div>
-                    </div>
-                    <div>
-                        <small>Felgenwürfe (+ Addieren):</small>
-                        <div style="display:flex; gap:5px; margin-bottom:10px;">
-                            <input type="number" id="fIn-${p.id}" placeholder="+Zahl" style="padding:5px; margin:0;">
-                            <button onclick="addF(${p.id})" style="width:auto; padding:5px 10px; background:#2ecc71; color:white;">OK</button>
-                        </div>
-                        <input type="date" value="${p.birth}" onchange="updateF(${p.id}, 'birth', this.value)" style="padding:5px; font-size:0.8rem;">
-                        <input type="text" value="${p.size}" onchange="updateF(${p.id}, 'size', this.value)" placeholder="Größe" style="padding:5px; font-size:0.8rem; margin-top:5px;">
-                    </div>
+                <strong>${p.name}</strong><br>
+                <input type="number" id="f-${p.id}" placeholder="+ Felgen" style="width:70px; margin-top:5px;">
+                <button onclick="addF(${p.id})" style="width:auto; padding:5px;">OK</button>
+                <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:2px; margin-top:5px;">
+                    ${months.map((m, i) => `<label style="font-size:0.6rem;"><input type="checkbox" ${p.monthsPaid.includes(i) ? 'checked' : ''} onchange="toggleM(${p.id}, ${i})">${m}</label>`).join('')}
                 </div>
             </div>
         `).join('');
     }
-
-    function toggleM(id, idx) {
+function toggleM(id, idx) {
         const p = players.find(p => p.id === id);
         const pos = p.monthsPaid.indexOf(idx);
         pos > -1 ? p.monthsPaid.splice(pos, 1) : p.monthsPaid.push(idx);
     }
     function addF(id) {
-        const input = document.getElementById(`fIn-${id}`);
-        const val = parseInt(input.value);
-        if(!isNaN(val)) { players.find(p => p.id === id).felgen += val; input.value = ''; renderEdit(); }
+        const val = parseInt(document.getElementById(`f-${id}`).value);
+        if(!isNaN(val)) { players.find(p => p.id === id).felgen += val; updateUI(); }
     }
-    function updateF(id, f, v) { players.find(p => p.id === id)[f] = v; }
-    function delP(id) { if(confirm('Spieler wirklich löschen?')){ players = players.filter(p => p.id !== id); updateUI(); }}
-
     function showTab(tabId, el) {
         document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         el.classList.add('active');
-        if(tabId === 'kader-tab') renderKader();
     }
 </script>
 </body>
