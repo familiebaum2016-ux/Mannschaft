@@ -3,88 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mannschaftsmanager | Dart</title>
+    <title>Mannschaftsmanager | Tim Baum</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
-        :root { --red: #c0392b; --dark: #1e272e; --gold: #f1c40f; }
-        body { font-family: sans-serif; background: #2d3436; color: white; margin: 0; text-align: center; }
-        header { background: var(--dark); padding: 15px; border-bottom: 3px solid var(--gold); }
-        .container { max-width: 1100px; margin: auto; padding: 10px; }
-        .card { background: white; color: black; padding: 20px; border-radius: 12px; margin-bottom: 15px; text-align: left; overflow-x: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        input, select { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; border-radius: 5px; border: 1px solid #ccc; }
-        button { padding: 12px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; transition: 0.2s; }
-        .btn-green { background: #27ae60; color: white; width: 100%; }
-        .btn-green:hover { background: #219150; }
-        .tabs { display: flex; margin-bottom: 20px; gap: 5px; }
-        .tab { flex: 1; padding: 15px; background: #34495e; color: white; cursor: pointer; border: none; border-radius: 8px 8px 0 0; }
-        .tab.active { background: white; color: black; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th, td { padding: 12px 8px; border-bottom: 1px solid #eee; text-align: center; }
-        .month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; font-size: 0.65rem; }
-        .month-item { display: flex; flex-direction: column; align-items: center; }
-        #auth-container { max-width: 380px; margin: 60px auto; background: #34495e; padding: 30px; border-radius: 15px; border: 2px solid var(--gold); }
+        :root { --primary: #c0392b; --dark: #1e272e; --accent: #f1c40f; }
+        body { font-family: 'Segoe UI', sans-serif; background: #2d3436; margin: 0; color: white; }
+        header { background: #1e272e; padding: 20px; border-bottom: 3px solid var(--accent); text-align: center; }
+        .container { max-width: 1100px; margin: 20px auto; padding: 10px; }
+        #auth-container { max-width: 400px; margin: 50px auto; background: #34495e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); text-align: center; }
+        input { padding: 10px; border-radius: 5px; border: none; margin: 5px; }
+        button { padding: 10px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; background: var(--primary); color: white; }
+        .card { background: white; color: black; padding: 20px; border-radius: 10px; margin-top: 20px; overflow-x: auto; shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 600px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background: #f2f2f2; font-size: 0.8rem; }
+        .btn-plus { background: #27ae60; color: white; padding: 5px 10px; margin: 2px; }
+        .btn-minus { background: #e67e22; color: white; padding: 5px 12px; margin: 2px; }
+        .btn-del { background: #c0392b; font-size: 0.7rem; padding: 5px; }
+        .month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; }
+        label { font-size: 0.6rem; display: block; }
     </style>
 </head>
 <body>
 
 <header>
-    <img src="logo.png" alt="Logo" style="max-width:100px; margin-bottom:10px;"><br>
-    <div style="color:var(--gold); font-weight:bold; letter-spacing:1px;">MANNSCHAFTS-PORTAL</div>
+    <h1 style="color:var(--accent); margin:0;">DART-MANNSCHAFTSMANAGER</h1>
 </header>
 
 <div class="container">
     <div id="auth-container">
-        <h2 style="margin-top:0;">LOGIN</h2>
+        <h3>LOGIN</h3>
         <input type="email" id="email" placeholder="E-Mail" value="tim.baum210690@gmail.com">
-        <input type="password" id="pass" placeholder="Passwort">
-        <button class="btn-green" onclick="handleLogin()">ANMELDEN</button>
+        <input type="password" id="password" placeholder="Passwort">
+        <button id="loginBtn">EINLOGGEN</button>
     </div>
 
-    <div id="main-app" style="display:none;">
-        <div class="tabs">
-            <button class="tab active" id="tabBtn1" onclick="switchTab('kader')">KADER</button>
-            <button class="tab" id="tabBtn2" onclick="switchTab('admin')">VERWALTUNG</button>
+    <div id="app-content" style="display:none;">
+        <div style="text-align:right; margin-bottom: 10px;">
+            <span id="userEmail" style="margin-right:15px; color:var(--accent);"></span>
+            <button onclick="firebase.auth().signOut()" style="background:grey; padding: 5px 10px;">Abmelden</button>
         </div>
 
-        <div id="section-kader" style="display:block;">
-            <div class="card">
-                <h3>MANNSCHAFTSÜBERSICHT</h3>
-                <table>
-                    <thead>
-                        <tr><th>Name</th><th>Geburtstag</th><th>Trikot</th><th>Felgen</th><th>Status</th></tr>
-                    </thead>
-                    <tbody id="viewTableBody"></tbody>
-                </table>
-            </div>
+        <div class="card">
+            <h3>NEUEN SPIELER HINZUFÜGEN</h3>
+            <input type="text" id="playerName" placeholder="Vorname Nachname">
+            <button onclick="addPlayer()">HINZUFÜGEN</button>
         </div>
 
-        <div id="section-admin" style="display:none;">
-            <div class="card">
-                <h3>NEUER SPIELER</h3>
-                <input type="text" id="addName" placeholder="Vorname Nachname">
-                <input type="date" id="addBirth">
-                <select id="addSize">
-                    <option value="">Trikotgröße</option>
-                    <option value="S">S</option><option value="M">M</option><option value="L">L</option>
-                    <option value="XL">XL</option><option value="XXL">XXL</option>
-                </select>
-<button class="btn-green" onclick="addNewPlayer()">SPIELER SPEICHERN</button>
-            </div>
-            <div class="card">
-                <h3>DATEN BEARBEITEN</h3>
-                <table id="adminTable">
-                    <thead><tr><th>Name</th><th>Felgen</th><th>Monate (Jan-Dez)</th><th>Aktion</th></tr></thead>
-                    <tbody id="adminTableBody"></tbody>
-                </table>
-            </div>
-            <button onclick="firebase.auth().signOut()" style="background:#7f8c8d; color:white; width:100%; margin-top:10px;">Abmelden</button>
+        <div class="card">
+            <h3>SPIELERLISTE & MONATSBEITRÄGE</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Felgen-Zähler</th>
+                        <th>Beitrag (Jan - Dez)</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody id="playerTableBody"></tbody>
+            </table>
         </div>
     </div>
 </div>
 
 <script>
+    // DEIN NEUER KEY IST JETZT HIER DRIN
     const firebaseConfig = {
         apiKey: "AIzaSyBMtWxbRPX4hBtBPi-Yn6uYt6I-ud5SyY8",
         authDomain: "mannschaftsmanager.firebaseapp.com",
@@ -98,88 +84,93 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    function handleLogin() {
-        const m = document.getElementById('email').value.trim();
-        const p = document.getElementById('pass').value;
-        auth.signInWithEmailAndPassword(m, p).catch(err => alert("Login-Fehler: " + err.message));
-    }
+    // Login Logik
+    document.
+getElementById('loginBtn').addEventListener('click', () => {
+        const email = document.getElementById('email').value.trim();
+        const pass = document.getElementById('password').value;
+        auth.signInWithEmailAndPassword(email, pass).catch(err => alert("Fehler: " + err.message));
+    });
 
     auth.onAuthStateChanged(user => {
-        if(user) {
+        if (user) {
             document.getElementById('auth-container').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            startSync();
+            document.getElementById('app-content').style.display = 'block';
+            document.getElementById('userEmail').innerText = user.email;
+            loadPlayers();
         } else {
             document.getElementById('auth-container').style.display = 'block';
-            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('app-content').style.display = 'none';
         }
     });
 
-    function switchTab(t) {
-        document.getElementById('section-kader').style.display = (t == 'kader' ? 'block' : 'none');
-        document.getElementById('section-admin').style.display = (t == 'admin' ? 'block' : 'none');
-        document.getElementById('tabBtn1').className = (t == 'kader' ? 'tab active' : 'tab');
-        document.getElementById('tabBtn2').className = (t == 'admin' ? 'tab active' : 'tab');
+    // Spieler in die Datenbank schreiben
+    async function addPlayer() {
+        const name = document.getElementById('playerName').value;
+        if (!name) return;
+        try {
+            await db.collection("players").add({
+                name: name,
+                felgen: 0,
+                months: new Array(12).fill(false),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            document.getElementById('playerName').value = "";
+        } catch (e) { alert("Fehler beim Speichern: " + e.message); }
     }
 
-    async function addNewPlayer() {
-        const n = document.getElementById('addName').value;
-        const b = document.getElementById('addBirth').value;
-        const s = document.getElementById('addSize').value;
-        if(!n) return alert("Bitte Namen eingeben");
-        await db.collection("players").add({
-            name: n, birth: b, size: s, felgen: 0,
-            months: new Array(12).fill(false),
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        document.getElementById('addName').value = "";
-    }
-
-    function startSync() {
-        db.collection("players").orderBy("createdAt", "asc").onSnapshot(snap => {
-            const vBody = document.getElementById('viewTableBody');
-            const aBody = document.getElementById('adminTableBody');
-            vBody.innerHTML = ""; aBody.innerHTML = "";
-            
-            snap.forEach(doc => {
+    // Spielerliste live laden
+    function loadPlayers() {
+        db.collection("players").orderBy("createdAt", "asc").onSnapshot(snapshot => {
+            const tbody = document.getElementById('playerTableBody');
+            tbody.innerHTML = "";
+            snapshot.forEach(doc => {
                 const p = doc.data();
                 const id = doc.id;
-                const m = p.months || new Array(12).fill(false);
-                const paid = m.filter(x => x === true).length;
-
-                vBody.innerHTML += `<tr>
-                    <td><strong>${p.name}</strong></td>
-                    <td>${p.birth || '-'}</td>
-                    <td>${p.size || '-'}</td>
-                    <td style="color:red; font-weight:bold;">${p.felgen || 0}</td>
-                    <td>${paid}/12 bezahlt</td>
-                </tr>`;
-
-                let mGrid = '<div class="month-grid">';
-                const mNames = ["J","F","M","A","M","J","J","A","S","O","N","D"];
+                const monate = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+                
+                let monthHtml = '<div class="month-grid">';
                 for(let i=0; i<12; i++) {
-                    mGrid += <div class="month-item">${mNames[i]}<input type="checkbox" ${m[i]?'checked':''} onclick="toggleM('${id}',${i})"></div>;
+                    monthHtml += `
+                        <div>
+                            <label>${monate[i]}</label>
+                            <input type="checkbox" ${p.months && p.months[i] ? 'checked' : ''} 
+                            onclick="toggleMonth('${id}', ${i})">
+                        </div>`;
                 }
-                mGrid += '</div>';
+                monthHtml += '</div>';
 
-                aBody.innerHTML += `<tr>
-<td style="text-align:left;">${p.name}</td>
-                    <td><button onclick="updateF('${id}',${(p.felgen||0)-1})">-</button> <strong>${p.felgen||0}</strong> <button onclick="updateF('${id}',${(p.felgen||0)+1})">+</button></td>
-                    <td>${mGrid}</td>
-                    <td><button onclick="deleteP('${id}')" style="background:#e74c3c; color:white; padding:5px;">X</button></td>
-                </tr>`;
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${p.name}</strong></td>
+                        <td>
+                            <button class="btn-minus" onclick="updateFelgen('${id}', ${p.felgen - 1})">-</button>
+                            <span style="font-size:1.3rem; font-weight:bold; margin:0 10px;">${p.felgen || 0}</span>
+                            <button class="btn-plus" onclick="updateFelgen('${id}', ${p.felgen + 1})">+</button>
+                        </td>
+                        <td>${monthHtml}</td>
+                        <td><button class="btn-del" onclick="deletePlayer('${id}')">X</button></td>
+                    </tr>
+                `;
             });
         });
     }
 
-    async function updateF(id, v) { if(v < 0) v = 0; await db.collection("players").doc(id).update({felgen: v}); }
-    async function deleteP(id) { if(confirm("Spieler löschen?")) await db.collection("players").doc(id).delete(); }
-    async function toggleM(id, i) {
-        const ref = db.collection("players").doc(id);
-        const d = await ref.get();
-        let m = d.data().months || new Array(12).fill(false);
-        m[i] = !m[i];
-        await ref.update({months: m});
+    async function updateFelgen(id, val) {
+        if(val < 0) val = 0;
+        await db.collection("players").doc(id).update({ felgen: val });
+    }
+
+    async function toggleMonth(id, index) {
+        const docRef = db.collection("players").doc(id);
+        const doc = await docRef.get();
+        let months = doc.data().months || new Array(12).fill(false);
+        months[index] = !months[index];
+        await docRef.update({ months: months });
+    }
+
+    async function deletePlayer(id) {
+        if(confirm("Spieler wirklich löschen?")) await db.collection("players").doc(id).delete();
     }
 </script>
 </body>
