@@ -12,37 +12,21 @@
         body { font-family: 'Segoe UI', sans-serif; background: #2d3436; margin: 0; color: white; }
         header { background: #1e272e; padding: 15px; border-bottom: 4px solid var(--accent); text-align: center; }
         .logo-img { max-width: 120px; height: auto; }
-        
         .container { max-width: 1200px; margin: 20px auto; padding: 10px; }
-        
-        /* Tabs Styling */
         .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { background: #34495e; color: white; padding: 12px 25px; border-radius: 8px 8px 0 0; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; flex: 1; max-width: 200px; }
+        .tab-btn { background: #34495e; color: white; padding: 12px 25px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; flex: 1; max-width: 200px; }
         .tab-btn.active { background: var(--light); color: var(--dark); border-bottom: 4px solid var(--accent); }
-
         .content-section { display: none; }
         .content-section.active { display: block; }
-
-        /* Karten & Tabellen */
         .card { background: white; color: #2d3436; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); overflow-x: auto; }
-        h3 { margin-top: 0; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
-        
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th { background: #f1f2f6; padding: 10px; font-size: 0.8rem; border-bottom: 2px solid #dfe4ea; }
         td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
-
-        /* Eingabefelder */
         .admin-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 15px; }
         input, select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; width: 100%; box-sizing: border-box; }
-        
-        /* Monats-Gitter */
         .month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
         .month-item { font-size: 0.65rem; display: flex; flex-direction: column; align-items: center; }
-
-        /* Zähler */
-        .count-controls { display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-small { padding: 4px 10px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; }
-
         #auth-container { max-width: 400px; margin: 100px auto; background: #34495e; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid var(--accent); }
     </style>
 </head>
@@ -58,7 +42,7 @@
         <h2>LOGIN</h2>
         <input type="email" id="email" placeholder="E-Mail" value="tim.baum210690@gmail.com">
         <input type="password" id="password" placeholder="Passwort">
-        <button onclick="login()" style="margin-top:15px; background:var(--success); padding:12px; width:100%; border-radius:8px; border:none; color:white; font-weight:bold; cursor:pointer;">EINLOGGEN</button>
+        <button id="loginBtn" style="margin-top:15px; background:var(--success); padding:12px; width:100%; border-radius:8px; border:none; color:white; font-weight:bold; cursor:pointer;">EINLOGGEN</button>
     </div>
 
     <div id="app-content" style="display:none;">
@@ -71,7 +55,7 @@
             <div class="card">
                 <h3>MANNSCHAFTSÜBERSICHT</h3>
                 <table>
-<thead>
+                    <thead>
                         <tr>
                             <th>Name</th>
                             <th>Geburtstag</th>
@@ -81,7 +65,7 @@
                         </tr>
                     </thead>
                     <tbody id="viewTableBody"></tbody>
-                </table>
+</table>
             </div>
         </div>
 
@@ -102,18 +86,10 @@
                     <button onclick="addPlayer()" style="background:var(--success); border-radius:5px; border:none; color:white; cursor:pointer;">Hinzufügen</button>
                 </div>
             </div>
-
             <div class="card">
                 <h3>DATEN BEARBEITEN</h3>
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Spieler / Info</th>
-                            <th>Felgen</th>
-                            <th>Beiträge (Jan-Dez)</th>
-                            <th>Aktion</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Spieler / Info</th><th>Felgen</th><th>Beiträge (Jan-Dez)</th><th>Aktion</th></tr></thead>
                     <tbody id="adminTableBody"></tbody>
                 </table>
             </div>
@@ -123,6 +99,7 @@
 </div>
 
 <script>
+    // Konfiguration
     const firebaseConfig = {
         apiKey: "AIzaSyBMtWxbRPX4hBtBPi-Yn6uYt6I-ud5SyY8",
         authDomain: "mannschaftsmanager.firebaseapp.com",
@@ -134,21 +111,24 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
-    function login() {
-        const e = document.getElementById('email').value;
-        const p = document.getElementById('password').value;
-        firebase.auth().signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
-    }
+    // Login Event
+    document.getElementById('loginBtn').addEventListener('click', () => {
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        auth.signInWithEmailAndPassword(email, password)
+            .catch(error => alert("Login fehlgeschlagen: " + error.message));
+    });
 
-    firebase.auth().onAuthStateChanged(user => {
-        if(user) {
-            document.getElementById('auth-container').style.display='none';
-            document.getElementById('app-content').style.display='block';
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('app-content').style.display = 'block';
             syncData();
         } else {
-            document.getElementById('auth-container').style.display='block';
-            document.getElementById('app-content').style.display='none';
+            document.getElementById('auth-container').style.display = 'block';
+            document.getElementById('app-content').style.display = 'none';
         }
     });
 
@@ -163,68 +143,57 @@
         const name = document.getElementById('newName').value;
         const birth = document.getElementById('newBirth').value;
         const size = document.getElementById('newSize').value;
-        if(!name) return;
+        if (!name) return;
         await db.collection("players").add({
             name, birth, size,
             felgen: 0,
             months: new Array(12).fill(false),
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        document.getElementById('newName').value="";
+        document.getElementById('newName').value = "";
     }
-function syncData() {
-        db.collection("players").orderBy("createdAt").onSnapshot(snap => {
+
+    function syncData() {
+        db.collection("players").orderBy("createdAt", "asc").onSnapshot(snap => {
             const viewBody = document.getElementById('viewTableBody');
             const adminBody = document.getElementById('adminTableBody');
             viewBody.innerHTML = ""; adminBody.innerHTML = "";
-
             snap.forEach(doc => {
                 const p = doc.data();
-                const id = doc.id;
+const id = doc.id;
                 const paidCount = (p.months || []).filter(m => m).length;
 
-                // KADER ANSICHT
                 viewBody.innerHTML += `<tr>
                     <td><strong>${p.name}</strong></td>
                     <td>${p.birth || '-'}</td>
-                    <td><span style="background:#eee;padding:2px 8px;border-radius:4px;">${p.size || '-'}</span></td>
+                    <td>${p.size || '-'}</td>
                     <td style="color:red; font-weight:bold;">${p.felgen || 0}</td>
                     <td>${paidCount}/12 bezahlt</td>
                 </tr>`;
 
-                // ADMIN BEARBEITEN
                 let mHtml = '<div class="month-grid">';
                 const mNames = ["J","F","M","A","M","J","J","A","S","O","N","D"];
                 for(let i=0; i<12; i++) {
-                    mHtml += <div class="month-item">${mNames[i]}<input type="checkbox" ${p.months[i]?'checked':''} onclick="toggleM('${id}',${i})"></div>;
+                    mHtml += <div class="month-item">${mNames[i]}<input type="checkbox" ${p.months && p.months[i]?'checked':''} onclick="toggleM('${id}',${i})"></div>;
                 }
                 mHtml += '</div>';
 
                 adminBody.innerHTML += `<tr>
-                    <td style="text-align:left;">
-                        <strong>${p.name}</strong><br>
-                        <small>${p.birth  'Kein Datum'} | Gr: ${p.size  '-'}</small>
-                    </td>
-                    <td>
-                        <div class="count-controls">
-                            <button class="btn-small" onclick="updF('${id}',${(p.felgen||0)-1})">-</button>
-                            <span>${p.felgen||0}</span>
-                            <button class="btn-small" onclick="updF('${id}',${(p.felgen||0)+1})">+</button>
-                        </div>
-                    </td>
+                    <td style="text-align:left;"><strong>${p.name}</strong><br><small>${p.birth  ''} | ${p.size  ''}</small></td>
+                    <td><button onclick="updF('${id}',${(p.felgen||0)-1})">-</button> ${p.felgen||0} <button onclick="updF('${id}',${(p.felgen||0)+1})">+</button></td>
                     <td>${mHtml}</td>
-                    <td><button onclick="delP('${id}')" style="background:none; border:1px solid #ccc; cursor:pointer; font-size:0.7rem;">Löschen</button></td>
+                    <td><button onclick="delP('${id}')">X</button></td>
                 </tr>`;
             });
         });
     }
 
-    async function updF(id, v) { if(v<0) v=0; await db.collection("players").doc(id).update({felgen:v}); }
+    async function updF(id, v) { if(v<0) v=0; await db.collection("players").doc(id).update({felgen: v}); }
     async function delP(id) { if(confirm("Löschen?")) await db.collection("players").doc(id).delete(); }
     async function toggleM(id, idx) {
         const ref = db.collection("players").doc(id);
         const d = await ref.get();
-        let m = d.data().months;
+        let m = d.data().months || new Array(12).fill(false);
         m[idx] = !m[idx];
         await ref.update({months: m});
     }
