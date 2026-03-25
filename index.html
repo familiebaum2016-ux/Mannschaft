@@ -3,42 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mannschaftsmanager | By Tim Baum</title>
+    <title>Mannschaftsmanager | Tim Baum</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         :root { --primary: #c0392b; --dark: #1e272e; --accent: #f1c40f; }
         body { font-family: 'Segoe UI', sans-serif; background: #2d3436; margin: 0; color: white; text-align: center; }
         header { background: #1e272e; padding: 20px; border-bottom: 2px solid var(--accent); }
-        .logo-img { max-width: 250px; height: auto; margin-bottom: 10px; }
+        .logo-img { max-width: 200px; height: auto; }
         #auth-container { max-width: 400px; margin: 50px auto; background: #34495e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); }
         input { padding: 12px; border-radius: 8px; border: none; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
         button { padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; width: 100%; background: var(--primary); color: white; }
-        #app-content { display: none; padding: 20px; background: white; color: black; margin: 20px; border-radius: 15px; }
+        #app-content { display: none; padding: 20px; }
     </style>
 </head>
 <body>
 
 <header>
-    <img src="logo.png" alt="Logo" class="logo-img">
     <h2 style="color:var(--accent); margin:0;">MANNSCHAFTSMANAGER</h2>
+    <p style="font-size: 0.8rem;">Sicherheitssystem Aktiv</p>
 </header>
 
 <div id="auth-container">
-    <h3>DART-FREUNDE ZUGANG</h3>
+    <h3>DART-FREUNDE LOGIN</h3>
     <input type="email" id="email" placeholder="E-Mail" value="tim.baum210690@gmail.com">
     <input type="password" id="password" placeholder="Passwort">
-    <button onclick="handleAuth()">LOGIN / REGISTRIEREN</button>
+    <button id="loginBtn">JETZT EINLOGGEN</button>
 </div>
 
 <div id="app-content">
-    <h2 style="color: #c0392b;">WILLKOMMEN IM KADER!</h2>
-    <p>Der Login war erfolgreich. Hier kommen bald deine Spielerdaten hin.</p>
-    <button onclick="firebase.auth().signOut()" style="background: grey; width: auto; padding: 10px 20px;">Abmelden</button>
+    <div style="background: white; color: black; padding: 20px; border-radius: 10px;">
+        <h2>LOGIN ERFOLGREICH! ✅</h2>
+        <p>Hallo Tim, du bist jetzt sicher eingeloggt.</p>
+        <button onclick="firebase.auth().signOut()" style="background:grey; width:auto;">ABMELDEN</button>
+    </div>
 </div>
 
 <script>
+    // Konfiguration - EXAKT so lassen
     const firebaseConfig = {
         apiKey: "AIzaSyBDivWSuOeTQqZJVJQshWGIxM1xifbh9-kA",
         authDomain: "mannschaftsmanager.firebaseapp.com",
@@ -48,29 +50,23 @@
         appId: "1:332675116491:web:9e0097d48023fb123b5a4e"
     };
 
+    // Firebase Start
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
 
-    async function handleAuth() {
+    // Login Funktion
+    document.getElementById('loginBtn').addEventListener('click', () => {
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
-        try {
-            // Login versuchen
-            await auth.signInWithEmailAndPassword(email, pass);
-        } catch (e) {
-            // Falls Account neu, Registrierung versuchen
-            if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
-                try {
-                    await auth.createUserWithEmailAndPassword(email, pass);
-                } catch (regErr) { alert("Fehler: " + regErr.message); }
-            } else { alert("Fehler: " + e.message); }
-        }
-    }
+        
+        firebase.auth().signInWithEmailAndPassword(email, pass)
+            .catch(err => {
+                alert("Fehler: " + err.message);
+            });
+    });
 
-    // DAS HIER ÜBERWACHT DEN LOGIN-STATUS:
-    auth.onAuthStateChanged(user => {
+    // Überprüfung ob eingeloggt
+    firebase.auth().onAuthStateChanged(user => {
         if (user) {
-            console.log("User ist eingeloggt!");
             document.getElementById('auth-container').style.display = 'none';
             document.getElementById('app-content').style.display = 'block';
         } else {
