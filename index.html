@@ -6,43 +6,69 @@
     <title>Mannschaftsmanager | Tim Baum</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         :root { --primary: #c0392b; --dark: #1e272e; --accent: #f1c40f; }
-        body { font-family: 'Segoe UI', sans-serif; background: #2d3436; margin: 0; color: white; text-align: center; }
-        header { background: #1e272e; padding: 20px; border-bottom: 2px solid var(--accent); }
-        .logo-img { max-width: 200px; height: auto; }
-        #auth-container { max-width: 400px; margin: 50px auto; background: #34495e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); }
-        input { padding: 12px; border-radius: 8px; border: none; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
-        button { padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; width: 100%; background: var(--primary); color: white; }
-        #app-content { display: none; padding: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #2d3436; margin: 0; color: white; }
+        header { background: #1e272e; padding: 20px; border-bottom: 3px solid var(--accent); text-align: center; }
+        .container { max-width: 1000px; margin: 20px auto; padding: 10px; }
+        #auth-container { max-width: 400px; margin: 50px auto; background: #34495e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); text-align: center; }
+        input { padding: 10px; border-radius: 5px; border: none; margin: 5px; }
+        button { padding: 10px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; background: var(--primary); color: white; }
+        .card { background: white; color: black; padding: 20px; border-radius: 10px; margin-top: 20px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background: #f2f2f2; }
+        .btn-plus { background: #27ae60; color: white; padding: 5px 10px; }
+        .btn-minus { background: #e67e22; color: white; padding: 5px 12px; }
+        .btn-del { background: #c0392b; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
 <header>
-    <h2 style="color:var(--accent); margin:0;">MANNSCHAFTSMANAGER</h2>
-    <p style="font-size: 0.8rem;">Sicherheitssystem Aktiv</p>
+    <h1 style="color:var(--accent); margin:0;">DART-MANNSCHAFTSMANAGER</h1>
 </header>
 
-<div id="auth-container">
-    <h3>DART-FREUNDE LOGIN</h3>
-    <input type="email" id="email" placeholder="E-Mail" value="tim.baum210690@gmail.com">
-    <input type="password" id="password" placeholder="Passwort">
-    <button id="loginBtn">JETZT EINLOGGEN</button>
-</div>
+<div class="container">
+    <div id="auth-container">
+        <h3>LOGIN</h3>
+        <input type="email" id="email" placeholder="E-Mail" value="tim.baum210690@gmail.com">
+        <input type="password" id="password" placeholder="Passwort">
+        <button id="loginBtn">EINLOGGEN</button>
+    </div>
 
-<div id="app-content">
-    <div style="background: white; color: black; padding: 20px; border-radius: 10px;">
-        <h2>LOGIN ERFOLGREICH! ✅</h2>
-        <p>Hallo Tim, du bist jetzt sicher eingeloggt.</p>
-        <button onclick="firebase.auth().signOut()" style="background:grey; width:auto;">ABMELDEN</button>
+    <div id="app-content" style="display:none;">
+        <div style="text-align:right;">
+            <button onclick="firebase.auth().signOut()" style="background:grey;">Abmelden</button>
+        </div>
+
+        <div class="card">
+            <h3>NEUEN SPIELER HINZUFÜGEN</h3>
+            <input type="text" id="playerName" placeholder="Name des Spielers">
+            <button onclick="addPlayer()">HINZUFÜGEN</button>
+        </div>
+
+        <div class="card">
+            <h3>SPIELERLISTE & BEITRÄGE</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Felgen</th>
+                        <th>Jan-Dez (Beitrag)</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody id="playerTableBody"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
-    // Konfiguration - EXAKT so lassen
     const firebaseConfig = {
-        apiKey: "AIzaSyBMtWxbRPX4hBtBPi-Yn6uYt6I-ud5SyY8",
+        apiKey: "AIzaSyBDivWSuOeTQqZJVJQshWGIxM1xifbh9-kA",
         authDomain: "mannschaftsmanager.firebaseapp.com",
         projectId: "mannschaftsmanager",
         storageBucket: "mannschaftsmanager.firebasestorage.app",
@@ -50,30 +76,87 @@
         appId: "1:332675116491:web:9e0097d48023fb123b5a4e"
     };
 
-    // Firebase Start
     firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    // Login Funktion
+    // Login Logik
     document.getElementById('loginBtn').addEventListener('click', () => {
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
-        
-        firebase.auth().signInWithEmailAndPassword(email, pass)
-            .catch(err => {
-                alert("Fehler: " + err.message);
-            });
+        firebase.auth().signInWithEmailAndPassword(email, pass).catch(err => alert(err.message));
     });
 
-    // Überprüfung ob eingeloggt
     firebase.auth().onAuthStateChanged(user => {
         if (user) {
             document.getElementById('auth-container').style.display = 'none';
-            document.getElementById('app-content').style.display = 'block';
+            document.getElementById('app-content').
+style.display = 'block';
+            loadPlayers();
         } else {
             document.getElementById('auth-container').style.display = 'block';
             document.getElementById('app-content').style.display = 'none';
         }
     });
+
+    // Spieler hinzufügen
+    async function addPlayer() {
+        const name = document.getElementById('playerName').value;
+        if (!name) return;
+        await db.collection("players").add({
+            name: name,
+            felgen: 0,
+            months: new Array(12).fill(false),
+            createdAt: new Date()
+        });
+        document.getElementById('playerName').value = "";
+    }
+
+    // Spieler laden
+    function loadPlayers() {
+        db.collection("players").orderBy("createdAt").onSnapshot(snapshot => {
+            const tbody = document.getElementById('playerTableBody');
+            tbody.innerHTML = "";
+            snapshot.forEach(doc => {
+                const p = doc.data();
+                const id = doc.id;
+                
+                let monthHtml = "";
+                for(let i=0; i<12; i++) {
+                    monthHtml += <input type="checkbox" ${p.months[i] ? 'checked' : ''} onclick="toggleMonth('${id}', ${i}, ${p.months[i]})" title="Monat ${i+1}">;
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${p.name}</strong></td>
+                        <td>
+                            <button class="btn-minus" onclick="updateFelgen('${id}', ${p.felgen - 1})">-</button>
+                            <span style="font-size:1.2rem; margin:0 10px;">${p.felgen}</span>
+                            <button class="btn-plus" onclick="updateFelgen('${id}', ${p.felgen + 1})">+</button>
+                        </td>
+                        <td>${monthHtml}</td>
+                        <td><button class="btn-del" onclick="deletePlayer('${id}')">Löschen</button></td>
+                    </tr>
+                `;
+            });
+        });
+    }
+
+    async function updateFelgen(id, val) {
+        if(val < 0) val = 0;
+        await db.collection("players").doc(id).update({ felgen: val });
+    }
+
+    async function toggleMonth(id, index, currentVal) {
+        let months = [];
+        const doc = await db.collection("players").doc(id).get();
+        months = doc.data().months;
+        months[index] = !currentVal;
+        await db.collection("players").doc(id).update({ months: months });
+    }
+
+    async function deletePlayer(id) {
+        if(confirm("Spieler wirklich löschen?")) await db.collection("players").doc(id).delete();
+    }
 </script>
 </body>
 </html>
