@@ -3,73 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dart Manager</title>
+    <title>Mannschaftsmanager | Dart</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         :root { --red: #c0392b; --dark: #1e272e; --gold: #f1c40f; }
         body { font-family: sans-serif; background: #2d3436; color: white; margin: 0; text-align: center; }
-        header { background: var(--dark); padding: 10px; border-bottom: 3px solid var(--gold); }
-        .container { max-width: 1000px; margin: auto; padding: 10px; }
-        .card { background: white; color: black; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left; overflow-x: auto; }
-        input, select { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; }
-        button { padding: 12px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
+        header { background: var(--dark); padding: 15px; border-bottom: 3px solid var(--gold); }
+        .container { max-width: 1100px; margin: auto; padding: 10px; }
+        .card { background: white; color: black; padding: 20px; border-radius: 12px; margin-bottom: 15px; text-align: left; overflow-x: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        input, select { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; border-radius: 5px; border: 1px solid #ccc; }
+        button { padding: 12px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; transition: 0.2s; }
         .btn-green { background: #27ae60; color: white; width: 100%; }
-        .tabs { display: flex; margin-bottom: 15px; }
-        .tab { flex: 1; padding: 10px; background: #34495e; color: white; cursor: pointer; border: none; }
-        .tab.active { background: white; color: black; }
-        .month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; font-size: 0.6rem; }
+        .btn-green:hover { background: #219150; }
+        .tabs { display: flex; margin-bottom: 20px; gap: 5px; }
+        .tab { flex: 1; padding: 15px; background: #34495e; color: white; cursor: pointer; border: none; border-radius: 8px 8px 0 0; }
+        .tab.active { background: white; color: black; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { padding: 12px 8px; border-bottom: 1px solid #eee; text-align: center; }
+        .month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; font-size: 0.65rem; }
+        .month-item { display: flex; flex-direction: column; align-items: center; }
+        #auth-container { max-width: 380px; margin: 60px auto; background: #34495e; padding: 30px; border-radius: 15px; border: 2px solid var(--gold); }
     </style>
 </head>
 <body>
 
 <header>
-    <img src="logo.png" alt="Logo" style="max-width:80px;"><br>
-    <small id="status" style="color:var(--gold);">System wird geladen...</small>
+    <img src="logo.png" alt="Logo" style="max-width:100px; margin-bottom:10px;"><br>
+    <div style="color:var(--gold); font-weight:bold; letter-spacing:1px;">MANNSCHAFTS-PORTAL</div>
 </header>
 
 <div class="container">
-    <div id="login-box" style="max-width:350px; margin: 50px auto; background:#34495e; padding:20px; border-radius:10px;">
-        <h3>LOGIN</h3>
+    <div id="auth-container">
+        <h2 style="margin-top:0;">LOGIN</h2>
         <input type="email" id="email" placeholder="E-Mail" value="tim.baum210690@gmail.com">
         <input type="password" id="pass" placeholder="Passwort">
-        <button class="btn-green" onclick="startLogin()">EINLOGGEN</button>
+        <button class="btn-green" onclick="handleLogin()">ANMELDEN</button>
     </div>
 
     <div id="main-app" style="display:none;">
         <div class="tabs">
-            <button class="tab active" id="b1" onclick="showT('kader')">KADER</button>
-            <button class="tab" id="b2" onclick="showT('admin')">VERWALTUNG</button>
+            <button class="tab active" id="tabBtn1" onclick="switchTab('kader')">KADER</button>
+            <button class="tab" id="tabBtn2" onclick="switchTab('admin')">VERWALTUNG</button>
         </div>
 
-        <div id="tab-kader" style="display:block;">
+        <div id="section-kader" style="display:block;">
             <div class="card">
-                <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr><th>Name</th><th>Geb.</th><th>Gr.</th><th>Felgen</th></tr></thead>
-                    <tbody id="viewBody"></tbody>
+                <h3>MANNSCHAFTSÜBERSICHT</h3>
+                <table>
+                    <thead>
+                        <tr><th>Name</th><th>Geburtstag</th><th>Trikot</th><th>Felgen</th><th>Status</th></tr>
+                    </thead>
+                    <tbody id="viewTableBody"></tbody>
                 </table>
             </div>
         </div>
 
-        <div id="tab-admin" style="display:none;">
+        <div id="section-admin" style="display:none;">
             <div class="card">
                 <h3>NEUER SPIELER</h3>
-                <input type="text" id="nName" placeholder="Name">
-                <input type="date" id="nBirth">
-                <select id="nSize">
-                    <option value="">Größe</option>
-                    <option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option>
+                <input type="text" id="addName" placeholder="Vorname Nachname">
+                <input type="date" id="addBirth">
+                <select id="addSize">
+                    <option value="">Trikotgröße</option>
+                    <option value="S">S</option><option value="M">M</option><option value="L">L</option>
+                    <option value="XL">XL</option><option value="XXL">XXL</option>
                 </select>
-                <button class="btn-green" onclick="addPlayer()">SPEICHERN</button>
+<button class="btn-green" onclick="addNewPlayer()">SPIELER SPEICHERN</button>
             </div>
             <div class="card">
-                <table style="width:100%; border-collapse:collapse;">
-                    <thead><tr><th>Name</th><th>Felgen</th><th>Beitrag</th><th>X</th></tr></thead>
-                    <tbody id="adminBody"></tbody>
+                <h3>DATEN BEARBEITEN</h3>
+                <table id="adminTable">
+                    <thead><tr><th>Name</th><th>Felgen</th><th>Monate (Jan-Dez)</th><th>Aktion</th></tr></thead>
+                    <tbody id="adminTableBody"></tbody>
                 </table>
             </div>
-            <button onclick="firebase.auth().signOut()" style="background:grey; color:white; width:100%;">Abmelden</button>
+            <button onclick="firebase.auth().signOut()" style="background:#7f8c8d; color:white; width:100%; margin-top:10px;">Abmelden</button>
         </div>
     </div>
 </div>
@@ -80,79 +90,96 @@
         authDomain: "mannschaftsmanager.firebaseapp.com",
         projectId: "mannschaftsmanager",
         storageBucket: "mannschaftsmanager.firebasestorage.app",
-messagingSenderId: "332675116491",
+        messagingSenderId: "332675116491",
         appId: "1:332675116491:web:9e0097d48023fb123b5a4e"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    document.getElementById('status').innerText = "System bereit ✅";
+    const auth = firebase.auth();
 
-    function startLogin() {
-        const m = document.getElementById('email').value;
+    function handleLogin() {
+        const m = document.getElementById('email').value.trim();
         const p = document.getElementById('pass').value;
-        firebase.auth().signInWithEmailAndPassword(m, p)
-            .catch(err => alert("FEHLER: " + err.message));
+        auth.signInWithEmailAndPassword(m, p).catch(err => alert("Login-Fehler: " + err.message));
     }
 
-    firebase.auth().onAuthStateChanged(user => {
+    auth.onAuthStateChanged(user => {
         if(user) {
-            document.getElementById('login-box').style.display = 'none';
+            document.getElementById('auth-container').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            loadData();
+            startSync();
         } else {
-            document.getElementById('login-box').style.display = 'block';
+            document.getElementById('auth-container').style.display = 'block';
             document.getElementById('main-app').style.display = 'none';
         }
     });
 
-    function showT(t) {
-        document.getElementById('tab-kader').style.display = (t=='kader'?'block':'none');
-        document.getElementById('tab-admin').style.display = (t=='admin'?'block':'none');
-        document.getElementById('b1').className = (t=='kader'?'tab active':'tab');
-        document.getElementById('b2').className = (t=='admin'?'tab active':'tab');
+    function switchTab(t) {
+        document.getElementById('section-kader').style.display = (t == 'kader' ? 'block' : 'none');
+        document.getElementById('section-admin').style.display = (t == 'admin' ? 'block' : 'none');
+        document.getElementById('tabBtn1').className = (t == 'kader' ? 'tab active' : 'tab');
+        document.getElementById('tabBtn2').className = (t == 'admin' ? 'tab active' : 'tab');
     }
 
-    async function addPlayer() {
-        const n = document.getElementById('nName').value;
-        if(!n) return;
+    async function addNewPlayer() {
+        const n = document.getElementById('addName').value;
+        const b = document.getElementById('addBirth').value;
+        const s = document.getElementById('addSize').value;
+        if(!n) return alert("Bitte Namen eingeben");
         await db.collection("players").add({
-            name: n, birth: document.getElementById('nBirth').value,
-            size: document.getElementById('nSize').value, felgen: 0,
-            months: new Array(12).fill(false), createdAt: new Date()
+            name: n, birth: b, size: s, felgen: 0,
+            months: new Array(12).fill(false),
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        document.getElementById('nName').value = "";
+        document.getElementById('addName').value = "";
     }
 
-    function loadData() {
-        db.collection("players").orderBy("createdAt").onSnapshot(snap => {
-            const vB = document.getElementById('viewBody');
-            const aB = document.getElementById('adminBody');
-            vB.innerHTML = ""; aB.innerHTML = "";
+    function startSync() {
+        db.collection("players").orderBy("createdAt", "asc").onSnapshot(snap => {
+            const vBody = document.getElementById('viewTableBody');
+            const aBody = document.getElementById('adminTableBody');
+            vBody.innerHTML = ""; aBody.innerHTML = "";
+            
             snap.forEach(doc => {
-                const p = doc.data(); const id = doc.id;
-                vB.innerHTML += <tr><td>${p.name}</td><td>${p.birth||'-'}</td><td>${p.size||'-'}</td><td style="color:red">${p.felgen}</td></tr>;
-                
-                let mH = '<div class="month-grid">';
-                for(let i=0; i<12; i++) {
-                    mH += <div>${i+1}<input type="checkbox" ${p.months[i]?'checked':''} onclick="toggleM('${id}',${i})"></div>;
-                }
-                mH += '</div>';
+                const p = doc.data();
+                const id = doc.id;
+                const m = p.months || new Array(12).fill(false);
+                const paid = m.filter(x => x === true).length;
 
-                aB.innerHTML += `<tr><td>${p.name}</td>
-                    <td><button onclick="updF('${id}',${p.felgen-1})">-</button> ${p.felgen} <button onclick="updF('${id}',${p.felgen+1})">+</button></td>
-                    <td>${mH}</td><td><button onclick="delP('${id}')">X</button></td></tr>`;
+                vBody.innerHTML += `<tr>
+                    <td><strong>${p.name}</strong></td>
+                    <td>${p.birth || '-'}</td>
+                    <td>${p.size || '-'}</td>
+                    <td style="color:red; font-weight:bold;">${p.felgen || 0}</td>
+                    <td>${paid}/12 bezahlt</td>
+                </tr>`;
+
+                let mGrid = '<div class="month-grid">';
+                const mNames = ["J","F","M","A","M","J","J","A","S","O","N","D"];
+                for(let i=0; i<12; i++) {
+                    mGrid += <div class="month-item">${mNames[i]}<input type="checkbox" ${m[i]?'checked':''} onclick="toggleM('${id}',${i})"></div>;
+                }
+                mGrid += '</div>';
+
+                aBody.innerHTML += `<tr>
+<td style="text-align:left;">${p.name}</td>
+                    <td><button onclick="updateF('${id}',${(p.felgen||0)-1})">-</button> <strong>${p.felgen||0}</strong> <button onclick="updateF('${id}',${(p.felgen||0)+1})">+</button></td>
+                    <td>${mGrid}</td>
+                    <td><button onclick="deleteP('${id}')" style="background:#e74c3c; color:white; padding:5px;">X</button></td>
+                </tr>`;
             });
         });
     }
 
-    function updF(id, v) { if(v>=0) db.collection("players").doc(id).update({felgen:v}); }
-    function delP(id) { if(confirm("Löschen?")) db.collection("players").doc(id).delete(); }
+    async function updateF(id, v) { if(v < 0) v = 0; await db.collection("players").doc(id).update({felgen: v}); }
+    async function deleteP(id) { if(confirm("Spieler löschen?")) await db.collection("players").doc(id).delete(); }
     async function toggleM(id, i) {
-        const r = db.collection("players").doc(id);
-        const d = await r.get();
-        let m = d.data().months; m[i] = !m[i];
-        r.update({months:m});
+        const ref = db.collection("players").doc(id);
+        const d = await ref.get();
+        let m = d.data().months || new Array(12).fill(false);
+        m[i] = !m[i];
+        await ref.update({months: m});
     }
 </script>
 </body>
