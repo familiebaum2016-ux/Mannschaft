@@ -3,98 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mannschaftsmanager | Dart-Freunde</title>
+    <title>Mannschaftsmanager Pro</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
-        :root { --primary: #c0392b; --dark: #1e272e; --accent: #f1c40f; --light: #f5f6fa; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #2d3436; margin: 0; color: white; }
+        :root { --primary: #c0392b; --dark: #1e272e; --accent: #f1c40f; --light: #f5f6fa; --success: #27ae60; }
+        body { font-family: 'Segoe UI', sans-serif; background: #2d3436; margin: 0; color: white; }
+        header { background: #1e272e; padding: 15px; border-bottom: 4px solid var(--accent); text-align: center; }
+        .logo-img { max-width: 120px; height: auto; }
         
-        /* Header & Logo */
-        header { background: #1e272e; padding: 20px; border-bottom: 4px solid var(--accent); text-align: center; }
-        .logo-img { max-width: 180px; height: auto; margin-bottom: 10px; filter: drop-shadow(0 0 5px rgba(241, 196, 15, 0.3)); }
+        .container { max-width: 1200px; margin: 20px auto; padding: 10px; }
         
-        .container { max-width: 1100px; margin: 20px auto; padding: 15px; }
+        /* Tabs Styling */
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { background: #34495e; color: white; padding: 12px 25px; border-radius: 8px 8px 0 0; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; flex: 1; max-width: 200px; }
+        .tab-btn.active { background: var(--light); color: var(--dark); border-bottom: 4px solid var(--accent); }
+
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+
+        /* Karten & Tabellen */
+        .card { background: white; color: #2d3436; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); overflow-x: auto; }
+        h3 { margin-top: 0; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
         
-        /* Login */
-        #auth-container { max-width: 380px; margin: 60px auto; background: #34495e; padding: 40px; border-radius: 20px; border: 2px solid var(--accent); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        input { padding: 12px; border-radius: 8px; border: 1px solid #ccc; margin: 8px 0; width: 100%; box-sizing: border-box; font-size: 1rem; }
-        button { padding: 12px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; background: var(--primary); color: white; transition: 0.3s; width: 100%; text-transform: uppercase; }
-        button:hover { background: #e74c3c; transform: translateY(-2px); }
-        
-        /* App Content */
-        .card { background: white; color: #2d3436; padding: 25px; border-radius: 15px; margin-top: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        h2, h3 { margin-top: 0; color: #2d3436; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
-        
-        /* Tabelle */
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; min-width: 700px; }
-        th { background: #f1f2f6; padding: 12px; text-align: center; font-size: 0.85rem; color: #2f3542; border-bottom: 3px solid #dfe4ea; }
-        td { padding: 15px 10px; border-bottom: 1px solid #eee; text-align: center; }
-        
-        /* Felgen-Zähler */
-        .felgen-box { display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .count-val { font-size: 1.5rem; font-weight: bold; min-width: 30px; color: var(--primary); }
-        .btn-circle { width: 35px; height: 35px; border-radius: 50%; padding: 0; font-size: 1.2rem; width: auto; min-width: 35px; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th { background: #f1f2f6; padding: 10px; font-size: 0.8rem; border-bottom: 2px solid #dfe4ea; }
+        td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
+
+        /* Eingabefelder */
+        .admin-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        input, select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; width: 100%; box-sizing: border-box; }
         
         /* Monats-Gitter */
-        .month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
-        .month-item { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; }
-        .month-item input { width: 18px; height: 18px; margin: 2px 0; cursor: pointer; }
+        .month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+        .month-item { font-size: 0.65rem; display: flex; flex-direction: column; align-items: center; }
 
-        .btn-del { background: #7f8c8d; width: auto; padding: 5px 10px; font-size: 0.7rem; }
-        .btn-del:hover { background: #c0392b; }
-        
-        .add-player-box { display: flex; gap: 10px; margin-top: 10px; }
-        .add-player-box input { flex: 1; margin: 0; }
-        .add-player-box button { width: auto; }
+        /* Zähler */
+        .count-controls { display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-small { padding: 4px 10px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; }
+
+        #auth-container { max-width: 400px; margin: 100px auto; background: #34495e; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid var(--accent); }
     </style>
 </head>
 <body>
 
 <header>
-    <img src="logo.png" alt="Dart-Freunde Logo" class="logo-img">
-    <div style="color:var(--accent); font-weight:bold; letter-spacing: 2px;">MANNSCHAFTSMANAGER</div>
+    <img src="logo.png" alt="Logo" class="logo-img">
+    <div style="color:var(--accent); font-weight:bold; margin-top:5px;">MANNSCHAFTS-PORTAL</div>
 </header>
 
 <div class="container">
     <div id="auth-container">
-        <h2 style="color:white; border:none;">ZUGANG KADER</h2>
+        <h2>LOGIN</h2>
         <input type="email" id="email" placeholder="E-Mail" value="tim.baum210690@gmail.com">
         <input type="password" id="password" placeholder="Passwort">
-        <button id="loginBtn">Einloggen</button>
+        <button onclick="login()" style="margin-top:15px; background:var(--success); padding:12px; width:100%; border-radius:8px; border:none; color:white; font-weight:bold; cursor:pointer;">EINLOGGEN</button>
     </div>
 
     <div id="app-content" style="display:none;">
-<div style="display: flex; justify-content: space-between; align-items: center; background: #1e272e; padding: 10px 20px; border-radius: 10px; border-left: 5px solid var(--accent);">
-            <span>Eingeloggt als: <strong id="userEmail" style="color:var(--accent);"></strong></span>
-            <button onclick="firebase.auth().signOut()" style="background:transparent; border:1px solid #7f8c8d; width:auto; padding: 5px 15px; font-size: 0.8rem;">Logout</button>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('kader-tab')">KADER</button>
+            <button class="tab-btn" onclick="showTab('admin-tab')">VERWALTUNG</button>
         </div>
 
-        <div class="card">
-            <h3><span style="color:var(--primary)">+</span> SPIELER HINZUFÜGEN</h3>
-            <div class="add-player-box">
-                <input type="text" id="playerName" placeholder="Vorname Nachname">
-                <button onclick="addPlayer()">Hinzufügen</button>
+        <div id="kader-tab" class="content-section active">
+            <div class="card">
+                <h3>MANNSCHAFTSÜBERSICHT</h3>
+                <table>
+<thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Geburtstag</th>
+                            <th>Trikot</th>
+                            <th>Felgen</th>
+                            <th>Beitrag Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="viewTableBody"></tbody>
+                </table>
             </div>
         </div>
 
-        <div class="card">
-            <h3>AKTUELLER KADER</h3>
-            <div class="table-wrapper">
+        <div id="admin-tab" class="content-section">
+            <div class="card">
+                <h3>NEUEN SPIELER ANLEGEN</h3>
+                <div class="admin-inputs">
+                    <input type="text" id="newName" placeholder="Name">
+                    <input type="date" id="newBirth">
+                    <select id="newSize">
+                        <option value="">Größe</option>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                        <option value="XXL">XXL</option>
+                    </select>
+                    <button onclick="addPlayer()" style="background:var(--success); border-radius:5px; border:none; color:white; cursor:pointer;">Hinzufügen</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>DATEN BEARBEITEN</h3>
                 <table>
                     <thead>
                         <tr>
-                            <th>SPIELER</th>
-                            <th>FELGEN-WÜRFE</th>
-                            <th>BEITRÄGE (JAN - DEZ)</th>
-                            <th>AKTION</th>
+                            <th>Spieler / Info</th>
+                            <th>Felgen</th>
+                            <th>Beiträge (Jan-Dez)</th>
+                            <th>Aktion</th>
                         </tr>
                     </thead>
-                    <tbody id="playerTableBody"></tbody>
+                    <tbody id="adminTableBody"></tbody>
                 </table>
             </div>
+            <button onclick="firebase.auth().signOut()" style="background:grey; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">Abmelden</button>
         </div>
     </div>
 </div>
@@ -111,90 +134,99 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const auth = firebase.auth();
 
-    document.getElementById('loginBtn').addEventListener('click', () => {
-        const email = document.getElementById('email').value.trim();
-        const pass = document.getElementById('password').value;
-        auth.signInWithEmailAndPassword(email, pass).catch(err => alert("Fehler: " + err.message));
-    });
+    function login() {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('password').value;
+        firebase.auth().signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
+    }
 
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            document.getElementById('auth-container').style.display = 'none';
-            document.getElementById('app-content').style.display = 'block';
-            document.getElementById('userEmail').innerText = user.email;
-            loadPlayers();
+    firebase.auth().onAuthStateChanged(user => {
+        if(user) {
+            document.getElementById('auth-container').style.display='none';
+            document.getElementById('app-content').style.display='block';
+            syncData();
         } else {
-            document.getElementById('auth-container').style.display = 'block';
-            document.getElementById('app-content').style.display = 'none';
+            document.getElementById('auth-container').style.display='block';
+            document.getElementById('app-content').style.display='none';
         }
     });
 
+    function showTab(tabId) {
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
     async function addPlayer() {
-        const name = document.getElementById('playerName').value;
-        if (!name) return;
+        const name = document.getElementById('newName').value;
+        const birth = document.getElementById('newBirth').value;
+        const size = document.getElementById('newSize').value;
+        if(!name) return;
         await db.collection("players").add({
-            name: name,
+            name, birth, size,
             felgen: 0,
             months: new Array(12).fill(false),
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        document.getElementById('playerName').value = "";
+        document.getElementById('newName').value="";
     }
+function syncData() {
+        db.collection("players").orderBy("createdAt").onSnapshot(snap => {
+            const viewBody = document.getElementById('viewTableBody');
+            const adminBody = document.getElementById('adminTableBody');
+            viewBody.innerHTML = ""; adminBody.innerHTML = "";
 
-    function loadPlayers() {
-        db.collection("players").orderBy("createdAt", "asc").onSnapshot(snapshot => {
-            const tbody = document.getElementById('playerTableBody');
-            tbody.innerHTML = "";
-            snapshot.forEach(doc => {
+            snap.forEach(doc => {
                 const p = doc.data();
                 const id = doc.id;
-                const monate = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"];
-                
-                let monthHtml = '<div class="month-grid">';
+                const paidCount = (p.months || []).filter(m => m).length;
+
+                // KADER ANSICHT
+                viewBody.innerHTML += `<tr>
+                    <td><strong>${p.name}</strong></td>
+                    <td>${p.birth || '-'}</td>
+                    <td><span style="background:#eee;padding:2px 8px;border-radius:4px;">${p.size || '-'}</span></td>
+                    <td style="color:red; font-weight:bold;">${p.felgen || 0}</td>
+                    <td>${paidCount}/12 bezahlt</td>
+                </tr>`;
+
+                // ADMIN BEARBEITEN
+                let mHtml = '<div class="month-grid">';
+                const mNames = ["J","F","M","A","M","J","J","A","S","O","N","D"];
                 for(let i=0; i<12; i++) {
-                    monthHtml += `
-                        <div class="month-item">
-                            <label>${monate[i]}</label>
-                            <input type="checkbox" ${p.months && p.months[i] ? 'checked' : ''} 
-                            onclick="toggleMonth('${id}', ${i})">
-                        </div>`;
+                    mHtml += <div class="month-item">${mNames[i]}<input type="checkbox" ${p.months[i]?'checked':''} onclick="toggleM('${id}',${i})"></div>;
                 }
-                monthHtml += '</div>';
-tbody.innerHTML += `
-                    <tr>
-                        <td style="text-align:left;"><strong>${p.name}</strong></td>
-                        <td>
-                            <div class="felgen-box">
-                                <button class="btn-circle btn-minus" onclick="updateFelgen('${id}', ${p.felgen - 1})">-</button>
-                                <span class="count-val">${p.felgen || 0}</span>
-                                <button class="btn-circle btn-plus" onclick="updateFelgen('${id}', ${p.felgen + 1})">+</button>
-                            </div>
-                        </td>
-                        <td>${monthHtml}</td>
-                        <td><button class="btn-del" onclick="deletePlayer('${id}')">Löschen</button></td>
-                    </tr>
-                `;
+                mHtml += '</div>';
+
+                adminBody.innerHTML += `<tr>
+                    <td style="text-align:left;">
+                        <strong>${p.name}</strong><br>
+                        <small>${p.birth  'Kein Datum'} | Gr: ${p.size  '-'}</small>
+                    </td>
+                    <td>
+                        <div class="count-controls">
+                            <button class="btn-small" onclick="updF('${id}',${(p.felgen||0)-1})">-</button>
+                            <span>${p.felgen||0}</span>
+                            <button class="btn-small" onclick="updF('${id}',${(p.felgen||0)+1})">+</button>
+                        </div>
+                    </td>
+                    <td>${mHtml}</td>
+                    <td><button onclick="delP('${id}')" style="background:none; border:1px solid #ccc; cursor:pointer; font-size:0.7rem;">Löschen</button></td>
+                </tr>`;
             });
         });
     }
 
-    async function updateFelgen(id, val) {
-        if(val < 0) val = 0;
-        await db.collection("players").doc(id).update({ felgen: val });
-    }
-
-    async function toggleMonth(id, index) {
-        const docRef = db.collection("players").doc(id);
-        const doc = await docRef.get();
-        let months = doc.data().months || new Array(12).fill(false);
-        months[index] = !months[index];
-        await docRef.update({ months: months });
-    }
-
-    async function deletePlayer(id) {
-        if(confirm("Spieler "+id+" wirklich entfernen?")) await db.collection("players").doc(id).delete();
+    async function updF(id, v) { if(v<0) v=0; await db.collection("players").doc(id).update({felgen:v}); }
+    async function delP(id) { if(confirm("Löschen?")) await db.collection("players").doc(id).delete(); }
+    async function toggleM(id, idx) {
+        const ref = db.collection("players").doc(id);
+        const d = await ref.get();
+        let m = d.data().months;
+        m[idx] = !m[idx];
+        await ref.update({months: m});
     }
 </script>
 </body>
