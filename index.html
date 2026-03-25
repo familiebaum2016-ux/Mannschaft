@@ -84,7 +84,7 @@
 </div>
 
 <script>
-    // DEINE DATEN VOM FOTO
+    // DEINE DATEN VOM FIREBASE-FOTO
     const firebaseConfig = {
         apiKey: "AIzaSyBDivWSuOeTQqZJVJQshWGIxM1xifbh9-kA",
         authDomain: "mannschaftsmanager.firebaseapp.com",
@@ -94,7 +94,7 @@
         appId: "1:332675116491:web:9e0097d48023fb123b5a4e"
     };
 
-    // INITIALISIERUNG ZUERST!
+    // INITIALISIERUNG ZUERST (Behebt den 'auth' Fehler)
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -111,8 +111,11 @@
         try {
             await auth.signInWithEmailAndPassword(email, pass);
         } catch (e) {
-            if(e.code === 'auth/user-not-found') {
-                await auth.createUserWithEmailAndPassword(email, pass);
+            if(e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
+                // Versuche Registrierung, falls Login fehlschlägt
+                try {
+                    await auth.createUserWithEmailAndPassword(email, pass);
+                } catch (regErr) { alert("Fehler: " + regErr.message); }
             } else { alert("Fehler: " + e.message); }
         }
     }
@@ -127,6 +130,7 @@
         } else {
             document.getElementById('auth-container').style.display = 'block';
             document.getElementById('app-content').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'none';
         }
     });
 
@@ -139,7 +143,7 @@
 
     async function saveToCloud() {
         await db.collection('users').doc(currentUser.uid).set({ players });
-        alert("Gespeichert!");
+        alert("Daten in Cloud gesichert!");
         updateUI();
     }
 
@@ -153,29 +157,36 @@
 
     function updateUI() {
         const body = document.getElementById('kaderBody');
-        body.innerHTML = players.map(p => `<tr><td>${p.name}</td><td>${months.map((m, i) => `<span class="badge ${p.monthsPaid.includes(i) ? 'paid' : ''}">${m}</span>`).join('')}</td><td>${p.felgen}</td><td>${p.birth || '-'}</td></tr>`).join('');
+        body.innerHTML = players.map(p => `<tr><td><strong>${p.name}</strong></td><td>${months.map((m, i) => `<span class="badge ${p.monthsPaid.includes(i) ? 'paid' : ''}">${m}</span>`).join('')}</td><td style="color:green; font-weight:bold;">${p.felgen}</td><td>${p.birth || '-'}</td></tr>`).join('');
         
         const edit = document.getElementById('editContainer');
         edit.innerHTML = players.map(p => `
             <div class="edit-card">
-                <strong>${p.name}</strong><br>
-                <input type="number" id="f-${p.id}" placeholder="+ Felgen" style="width:70px; margin-top:5px;">
-                <button onclick="addF(${p.id})" style="width:auto; padding:5px;">OK</button>
-                <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:2px; margin-top:5px;">
+                <div style="display:flex; justify-content:space-between;"><strong>${p.name}</strong><button onclick="delP(${p.id})" style="background:none; color:red; width:auto; border:none;">X</button></div>
+                <input type="number" id="f-${p.
+id}" placeholder="+ Felgen" style="width:80px; margin-top:5px;">
+                <button onclick="addF(${p.id})" style="width:auto; padding:5px; background:#2ecc71; color:white;">OK</button>
+                <input type="date" value="${p.birth}" onchange="updateF(${p.id}, 'birth', this.value)" style="width:130px; padding:5px; margin-left:10px;">
+                <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:2px; margin-top:10px;">
                     ${months.map((m, i) => `<label style="font-size:0.6rem;"><input type="checkbox" ${p.monthsPaid.includes(i) ? 'checked' : ''} onchange="toggleM(${p.id}, ${i})">${m}</label>`).join('')}
                 </div>
             </div>
         `).join('');
     }
-function toggleM(id, idx) {
+
+    function toggleM(id, idx) {
         const p = players.find(p => p.id === id);
         const pos = p.monthsPaid.indexOf(idx);
         pos > -1 ? p.monthsPaid.splice(pos, 1) : p.monthsPaid.push(idx);
     }
     function addF(id) {
-        const val = parseInt(document.getElementById(`f-${id}`).value);
-        if(!isNaN(val)) { players.find(p => p.id === id).felgen += val; updateUI(); }
+        const input = document.getElementById(`f-${id}`);
+        const val = parseInt(input.value);
+        if(!isNaN(val)) { players.find(p => p.id === id).felgen += val; input.value = ''; updateUI(); }
     }
+    function updateF(id, field, val) { players.find(p => p.id === id)[field] = val; }
+    function delP(id) { if(confirm('Löschen?')) { players = players.filter(p => p.id !== id); updateUI(); } }
+
     function showTab(tabId, el) {
         document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
