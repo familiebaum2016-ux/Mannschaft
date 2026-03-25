@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mannschaftsmanager | Dart</title>
+    <title>Dart Manager | Tim Baum</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -12,15 +12,18 @@
         body { font-family: 'Segoe UI', sans-serif; background: #2d3436; margin: 0; color: white; }
         header { background: #1e272e; padding: 20px; border-bottom: 3px solid var(--accent); text-align: center; }
         .container { max-width: 1100px; margin: 20px auto; padding: 10px; }
-        #auth-container { max-width: 400px; margin: 50px auto; background: #34495e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); text-align: center; }
-        input, select { padding: 10px; border-radius: 5px; border: none; margin: 5px; width: 85%; box-sizing: border-box; }
-        button { padding: 10px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; background: var(--primary); color: white; }
         
-        .tabs { display: flex; justify-content: center; margin-bottom: 20px; gap: 10px; }
-        .tab-btn { background: #34495e; flex: 1; max-width: 200px; border: 1px solid var(--accent); }
-        .tab-btn.active { background: var(--accent); color: black; }
+        /* Login Box (Dein Original) */
+        #auth-container { max-width: 400px; margin: 50px auto; background: #34495e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); text-align: center; }
+        input, select { padding: 10px; border-radius: 5px; border: none; margin: 5px; width: 90%; box-sizing: border-box; }
+        button { padding: 10px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; background: var(--primary); color: white; }
 
-        .card { background: white; color: black; padding: 20px; border-radius: 10px; margin-top: 20px; overflow-x: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        /* Navigation */
+        .nav-tabs { display: flex; justify-content: center; margin-bottom: 20px; gap: 10px; }
+        .nav-btn { background: #34495e; border: 1px solid var(--accent); flex: 1; max-width: 180px; }
+        .nav-btn.active { background: var(--accent); color: black; }
+
+        .card { background: white; color: black; padding: 20px; border-radius: 10px; margin-top: 10px; overflow-x: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 600px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
         th { background: #f2f2f2; font-size: 0.8rem; }
@@ -44,41 +47,41 @@
     </div>
 
     <div id="app-content" style="display:none;">
-        <div class="tabs">
-            <button id="tab-k-btn" class="tab-btn active" onclick="showView('kader')">KADER</button>
-            <button id="tab-a-btn" class="tab-btn" onclick="showView('admin')">VERWALTUNG</button>
+        <div class="nav-tabs">
+            <button id="btn-k" class="nav-btn active" onclick="changeTab('k')">KADER</button>
+            <button id="btn-a" class="nav-btn" onclick="changeTab('a')">VERWALTUNG</button>
         </div>
 
-        <div id="view-kader">
+        <div id="tab-kader">
             <div class="card">
-                <h3 style="margin:0;">MANNSCHAFTSÜBERSICHT</h3>
+                <h3 style="margin:0;">ÜBERSICHT</h3>
                 <table>
                     <thead>
-                        <tr><th>Name</th><th>Geburtstag</th><th>Größe</th><th>Felgen</th><th>Beiträge</th></tr>
+                        <tr><th>Name</th><th>Geburtstag</th><th>Größe</th><th>Felgen</th><th>Status</th></tr>
                     </thead>
                     <tbody id="kaderBody"></tbody>
                 </table>
             </div>
         </div>
 
-        <div id="view-admin" style="display:none;">
+        <div id="tab-admin" style="display:none;">
             <div class="card">
-                <h3>NEUER SPIELER</h3>
-                <input type="text" id="pName" placeholder="Name">
-                <input type="date" id="pBirth">
-                <select id="pSize">
+                <h3>SPIELER ANLEGEN</h3>
+                <input type="text" id="addN" placeholder="Name">
+                <input type="date" id="addB">
+                <select id="addS">
                     <option value="">Größe</option>
                     <option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option>
                 </select>
-                <button onclick="addPlayer()">SPEICHERN</button>
+                <button onclick="savePlayer()">HINZUFÜGEN</button>
             </div>
             <div class="card">
                 <h3>BEARBEITEN</h3>
                 <table>
                     <thead>
-                        <tr><th>Name</th><th>Felgen</th><th>Beitrag</th><th>Löschen</th></tr>
-                    </thead>
-<tbody id="adminBody"></tbody>
+                        <tr><th>Name</th><th>Felgen</th><th>Monate</th><th>Aktion</th></tr>
+</thead>
+                    <tbody id="adminBody"></tbody>
                 </table>
             </div>
             <button onclick="firebase.auth().signOut()" style="background:grey; margin-top:20px;">Abmelden</button>
@@ -100,44 +103,44 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    // LOGIN LOGIK (1:1 von dir übernommen)
-    document.getElementById('loginBtn').addEventListener('click', () => {
-        const email = document.getElementById('email').value.trim();
+    // Login (Exakt wie in deinem Original)
+    document.getElementById('loginBtn').onclick = () => {
+        const mail = document.getElementById('email').value.trim();
         const pass = document.getElementById('password').value;
-        auth.signInWithEmailAndPassword(email, pass).catch(err => alert("Fehler: " + err.message));
-    });
+        auth.signInWithEmailAndPassword(mail, pass).catch(e => alert(e.message));
+    };
 
     auth.onAuthStateChanged(user => {
         if (user) {
             document.getElementById('auth-container').style.display = 'none';
             document.getElementById('app-content').style.display = 'block';
-            loadData();
+            startSync();
         } else {
             document.getElementById('auth-container').style.display = 'block';
             document.getElementById('app-content').style.display = 'none';
         }
     });
 
-    function showView(view) {
-        document.getElementById('view-kader').style.display = (view === 'kader' ? 'block' : 'none');
-        document.getElementById('view-admin').style.display = (view === 'admin' ? 'block' : 'none');
-        document.getElementById('tab-k-btn').className = (view === 'kader' ? 'tab-btn active' : 'tab-btn');
-        document.getElementById('tab-a-btn').className = (view === 'admin' ? 'tab-btn active' : 'tab-btn');
+    function changeTab(t) {
+        document.getElementById('tab-kader').style.display = (t === 'k' ? 'block' : 'none');
+        document.getElementById('tab-admin').style.display = (t === 'a' ? 'block' : 'none');
+        document.getElementById('btn-k').className = (t === 'k' ? 'nav-btn active' : 'nav-btn');
+        document.getElementById('btn-a').className = (t === 'a' ? 'nav-btn active' : 'nav-btn');
     }
 
-    async function addPlayer() {
-        const name = document.getElementById('pName').value;
-        if (!name) return;
+    async function savePlayer() {
+        const n = document.getElementById('addN').value;
+        if (!n) return;
         await db.collection("players").add({
-            name: name, birth: document.getElementById('pBirth').value,
-            size: document.getElementById('pSize').value,
+            name: n, birth: document.getElementById('addB').value,
+            size: document.getElementById('addS').value,
             felgen: 0, months: new Array(12).fill(false),
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        document.getElementById('pName').value = "";
+        document.getElementById('addN').value = "";
     }
 
-    function loadData() {
+    function startSync() {
         db.collection("players").orderBy("createdAt", "asc").onSnapshot(snap => {
             const kB = document.getElementById('kaderBody');
             const aB = document.getElementById('adminBody');
@@ -146,16 +149,17 @@
             snap.forEach(doc => {
                 const p = doc.data();
                 const id = doc.id;
-                const paid = (p.months || []).filter(m => m).length;
+                const m = p.months || new Array(12).fill(false);
+                const paidCount = m.filter(v => v === true).length;
 
-                // KADER
-                kB.innerHTML += <tr><td><strong>${p.name}</strong></td><td>${p.birth||'-'}</td><td>${p.size||'-'}</td><td style="color:red; font-weight:bold;">${p.felgen}</td><td>${paid}/12</td></tr>;
+                // Kader Tabelle
+                kB.innerHTML += <tr><td><strong>${p.name}</strong></td><td>${p.birth||'-'}</td><td>${p.size||'-'}</td><td style="color:red; font-weight:bold;">${p.felgen}</td><td>${paidCount}/12</td></tr>;
 
-                // ADMIN
+                // Admin Tabelle
                 let mHtml = '<div class="month-grid">';
-                const names = ["J","F","M","A","M","J","J","A","S","O","N","D"];
+                const mons = ["J","F","M","A","M","J","J","A","S","O","N","D"];
                 for(let i=0; i<12; i++) {
-                    mHtml += <div><label>${names[i]}</label><input type="checkbox" ${p.months && p.months[i] ? 'checked' : ''} onclick="toggleM('${id}',${i})"></div>;
+                    mHtml += <div><label>${mons[i]}</label><input type="checkbox" ${m[i]?'checked':''} onclick="toggleM('${id}',${i})"></div>;
                 }
                 mHtml += '</div>';
 
