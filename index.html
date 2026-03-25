@@ -80,7 +80,6 @@
 </div>
 
 <script>
-    // DEINE DATEN (OHNE PUNKT-FEHLER)
     const firebaseConfig = {
         apiKey: "AIzaSyBDivWSuOeTQqZJVJQshWGIxM1xifbh9-kA",
         authDomain: "mannschaftsmanager.firebaseapp.com",
@@ -89,10 +88,11 @@
         messagingSenderId: "332675116491",
         appId: "1:332675116491:web:9e0097d48023fb123b5a4e"
     };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    // ... restlicher Code folgt hier
+</script>
 
     let currentUser = null;
     let players = [];
