@@ -7,76 +7,37 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
     <style>
-        :root { --primary: #c0392b; --dark: #1e272e; --light: #ecf0f1; --accent: #f1c40f; }
-        body { font-family: 'Segoe UI', sans-serif; background: #2d3436; margin: 0; padding: 0; color: white; text-align: center; }
-        header { background: #1e272e; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        :root { --primary: #c0392b; --dark: #1e272e; --accent: #f1c40f; }
+        body { font-family: 'Segoe UI', sans-serif; background: #2d3436; margin: 0; color: white; text-align: center; }
+        header { background: #1e272e; padding: 20px; border-bottom: 2px solid var(--accent); }
         .logo-img { max-width: 250px; height: auto; margin-bottom: 10px; }
-        h1 { color: var(--accent); margin: 5px 0; text-transform: uppercase; font-size: 1.8rem; }
-        
         #auth-container { max-width: 400px; margin: 50px auto; background: #34495e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); }
-        #app-content { display: none; padding: 20px; max-width: 900px; margin: 0 auto; }
-        
         input { padding: 12px; border-radius: 8px; border: none; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
-        button { padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
-        .btn-main { background: var(--primary); color: white; }
-        
-        .nav-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .nav-tab { padding: 10px 15px; cursor: pointer; background: #57606f; border-radius: 8px; font-weight: bold; }
-        .nav-tab.active { background: var(--primary); }
-        
-        .container { background: white; padding: 20px; border-radius: 15px; color: #2d3436; display: none; text-align: left; }
-        .container.active { display: block; }
-        
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
-        .badge { padding: 3px 6px; border-radius: 4px; font-size: 0.7rem; background: #dfe6e9; margin: 1px; display: inline-block; }
-        .badge.paid { background: #2ecc71; color: white; }
-        .edit-card { background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #ddd; }
+        button { padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; width: 100%; background: var(--primary); color: white; }
+        #app-content { display: none; padding: 20px; }
     </style>
 </head>
 <body>
 
 <header>
     <img src="logo.png" alt="Logo" class="logo-img">
-    <h1>Mannschaftsmanager</h1>
-    <button onclick="logout()" id="logoutBtn" style="display:none; width:auto; background:#ff7675; margin-top:10px;">Abmelden</button>
+    <h2 style="color:var(--accent); margin:0;">MANNSCHAFTSMANAGER</h2>
+    <p style="font-size:0.8rem;">Entwickelt von Tim Baum</p>
 </header>
 
 <div id="auth-container">
     <h3>DART-FREUNDE ZUGANG</h3>
     <input type="email" id="email" placeholder="E-Mail" value="tim.baum210690@gmail.com">
     <input type="password" id="password" placeholder="Passwort">
-    <button class="btn-main" onclick="handleAuth()">LOGIN / REGISTRIEREN</button>
+    <button onclick="handleAuth()">LOGIN / REGISTRIEREN</button>
 </div>
 
 <div id="app-content">
-    <div class="nav-tabs">
-        <div class="nav-tab active" onclick="showTab('add-tab', this)">NEU</div>
-        <div class="nav-tab" onclick="showTab('kader-tab', this)">KADER</div>
-        <div class="nav-tab" onclick="showTab('edit-tab', this)">BEARBEITEN</div>
-    </div>
-
-    <div id="add-tab" class="container active">
-        <h3>Spieler hinzufügen</h3>
-        <input type="text" id="pName" placeholder="Name des Spielers">
-        <button class="btn-main" onclick="addPlayer()">Hinzufügen</button>
-    </div>
-
-    <div id="kader-tab" class="container">
-        <h3>Kader-Übersicht</h3>
-        <table id="kaderTable">
-            <thead><tr><th>Name</th><th>Beiträge</th><th>Felgen</th></tr></thead>
-            <tbody id="kaderBody"></tbody>
-        </table>
-    </div>
-
-    <div id="edit-tab" class="container">
-        <h3>Daten verwalten</h3>
-        <div id="editContainer"></div>
-<button class="btn-main" onclick="saveToCloud()" style="background:#2d3436; margin-top:15px;">In Cloud speichern</button>
-    </div>
+    <h3 style="color:var(--accent);">Erfolgreich eingeloggt!</h3>
+    <button onclick="firebase.auth().signOut()" style="width:auto; background:grey; padding: 5px 15px;">Abmelden</button>
+    <hr>
+    <p>Hier kannst du gleich deine Spieler verwalten.</p>
 </div>
 
 <script>
@@ -88,15 +49,9 @@
         messagingSenderId: "332675116491",
         appId: "1:332675116491:web:9e0097d48023fb123b5a4e"
     };
+
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.firestore();
-    // ... restlicher Code folgt hier
-</script>
-
-    let currentUser = null;
-    let players = [];
-    const months = ["JAN", "FEB", "MÄR", "APR", "MAI", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"];
 
     async function handleAuth() {
         const email = document.getElementById('email').value;
@@ -104,80 +59,24 @@
         try {
             await auth.signInWithEmailAndPassword(email, pass);
         } catch (e) {
+            // Falls Account nicht existiert, wird er erstellt
             if(e.code === 'auth/invalid-credential' || e.code === 'auth/user-not-found') {
-                await auth.createUserWithEmailAndPassword(email, pass);
-            } else { alert("Fehler: " + e.message); }
+                try {
+                    await auth.createUserWithEmailAndPassword(email, pass);
+                } catch (regErr) { alert("Fehler: " + regErr.message); }
+            } else { alert("Login-Fehler: " + e.message); }
         }
     }
 
     auth.onAuthStateChanged(user => {
         if (user) {
-            currentUser = user;
             document.getElementById('auth-container').style.display = 'none';
             document.getElementById('app-content').style.display = 'block';
-            document.getElementById('logoutBtn').style.display = 'inline-block';
-            loadData();
         } else {
             document.getElementById('auth-container').style.display = 'block';
             document.getElementById('app-content').style.display = 'none';
-            document.getElementById('logoutBtn').style.display = 'none';
         }
     });
-
-    function logout() { auth.signOut(); }
-
-    async function loadData() {
-        const doc = await db.collection('users').doc(currentUser.uid).get();
-        if(doc.exists) { players = doc.data().players || []; updateUI(); }
-    }
-
-    async function saveToCloud() {
-        await db.collection('users').doc(currentUser.uid).set({ players });
-        alert("Gespeichert!");
-        updateUI();
-    }
-
-    function addPlayer() {
-        const name = document.getElementById('pName').value.trim();
-        if(!name) return;
-        players.push({ id: Date.now(), name, monthsPaid: [], felgen: 0 });
-        document.getElementById('pName').value = '';
-        saveToCloud();
-    }
-
-    function updateUI() {
-        document.getElementById('kaderBody').innerHTML = players.map(p => `
-            <tr><td><strong>${p.name}</strong></td>
-            <td>${months.map((m, i) => `<span class="badge ${p.monthsPaid.includes(i) ? 'paid' : ''}">${m}</span>`).join('')}</td>
-            <td>${p.felgen}</td></tr>`).join('');
-        
-        document.getElementById('editContainer').innerHTML = players.map(p => `
-            <div class="edit-card">
-                <strong>${p.name}</strong><br>
-                <input type="number" id="f-${p.id}" placeholder="+ Felgen" style="width:70px; margin:5px 0;">
-                <button onclick="addF(${p.id})" style="width:auto; padding:5px 10px;">OK</button>
-                <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:2px; margin-top:5px;">
-                    ${months.map((m, i) => `<label style="font-size:0.6rem;"><input type="checkbox" ${p.monthsPaid.includes(i) ? 'checked' : ''} onchange="toggleM(${p.id}, ${i})">${m}</label>`).join('')}
-                </div>
-            </div>`).join('');
-    }
-
-    function toggleM(id, idx) {
-        const p = players.find(p => p.id === id);
-        const pos = p.monthsPaid.indexOf(idx);
-        pos > -1 ? p.monthsPaid.splice(pos, 1) : p.monthsPaid.push(idx);
-    }
-    function addF(id) {
-        const val = parseInt(document.getElementById(`f-${id}`).value);
-        if(!isNaN(val)) { players.find(p => p.id === id).
-felgen += val; updateUI(); }
-    }
-    function showTab(tabId, el) {
-        document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        el.classList.add('active');
-    }
 </script>
 </body>
 </html>
