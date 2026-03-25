@@ -3,97 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mannschaftsmanager | Dart-Freunde</title>
+    <title>Dart Manager</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
-        :root { --primary: #c0392b; --dark: #1e272e; --accent: #f1c40f; --light: #f5f6fa; --success: #27ae60; }
-        body { font-family: sans-serif; background: #2d3436; margin: 0; color: white; text-align: center; }
-        header { background: #1e272e; padding: 15px; border-bottom: 4px solid var(--accent); }
-        .logo-img { max-width: 120px; height: auto; }
-        .container { max-width: 1100px; margin: 20px auto; padding: 10px; }
-        
-        /* Login Box */
-        #auth-container { max-width: 350px; margin: 50px auto; background: #34495e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); }
-        input, select { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; border-radius: 5px; border: none; }
-        .btn-main { background: var(--success); color: white; padding: 12px; width: 100%; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-
-        /* Tabs */
-        .tabs { display: flex; justify-content: center; margin-bottom: 20px; }
-        .tab-btn { background: #34495e; color: white; padding: 12px; border: none; cursor: pointer; flex: 1; font-weight: bold; }
-        .tab-btn.active { background: var(--light); color: var(--dark); }
-
-        .content-section { display: none; text-align: left; }
-        .content-section.active { display: block; }
-
-        /* Tabellen */
-        .card { background: white; color: black; padding: 15px; border-radius: 10px; margin-bottom: 20px; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th, td { padding: 8px; border-bottom: 1px solid #ddd; text-align: center; }
-        
-        .month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; }
-        .month-item { font-size: 0.6rem; text-align: center; }
+        :root { --red: #c0392b; --dark: #1e272e; --gold: #f1c40f; }
+        body { font-family: sans-serif; background: #2d3436; color: white; margin: 0; text-align: center; }
+        header { background: var(--dark); padding: 10px; border-bottom: 3px solid var(--gold); }
+        .container { max-width: 1000px; margin: auto; padding: 10px; }
+        .card { background: white; color: black; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left; overflow-x: auto; }
+        input, select { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+        button { padding: 12px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
+        .btn-green { background: #27ae60; color: white; width: 100%; }
+        .tabs { display: flex; margin-bottom: 15px; }
+        .tab { flex: 1; padding: 10px; background: #34495e; color: white; cursor: pointer; border: none; }
+        .tab.active { background: white; color: black; }
+        .month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; font-size: 0.6rem; }
     </style>
 </head>
 <body>
 
 <header>
-    <img src="logo.png" alt="Logo" class="logo-img">
-    <div style="color:var(--accent); font-weight:bold;">MANNSCHAFTS-PORTAL</div>
+    <img src="logo.png" alt="Logo" style="max-width:80px;"><br>
+    <small id="status" style="color:var(--gold);">System wird geladen...</small>
 </header>
 
 <div class="container">
-    <div id="auth-container">
-        <h2 style="margin-top:0;">LOGIN</h2>
+    <div id="login-box" style="max-width:350px; margin: 50px auto; background:#34495e; padding:20px; border-radius:10px;">
+        <h3>LOGIN</h3>
         <input type="email" id="email" placeholder="E-Mail" value="tim.baum210690@gmail.com">
-        <input type="password" id="password" placeholder="Passwort">
-        <button class="btn-main" onclick="handleLogin()">EINLOGGEN</button>
+        <input type="password" id="pass" placeholder="Passwort">
+        <button class="btn-green" onclick="startLogin()">EINLOGGEN</button>
     </div>
 
-    <div id="app-content" style="display:none;">
+    <div id="main-app" style="display:none;">
         <div class="tabs">
-            <button id="t1" class="tab-btn active" onclick="switchTab('kader-tab', 't1')">KADER</button>
-            <button id="t2" class="tab-btn" onclick="switchTab('admin-tab', 't2')">VERWALTUNG</button>
+            <button class="tab active" id="b1" onclick="showT('kader')">KADER</button>
+            <button class="tab" id="b2" onclick="showT('admin')">VERWALTUNG</button>
         </div>
 
-        <div id="kader-tab" class="content-section active">
+        <div id="tab-kader" style="display:block;">
             <div class="card">
-                <h3>MANNSCHAFTSÜBERSICHT</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th><th>Geburtstag</th><th>Trikot</th><th>Felgen</th><th>Beitrag</th>
-                        </tr>
-                    </thead>
-                    <tbody id="viewTableBody"></tbody>
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead><tr><th>Name</th><th>Geb.</th><th>Gr.</th><th>Felgen</th></tr></thead>
+                    <tbody id="viewBody"></tbody>
                 </table>
             </div>
         </div>
 
-        <div id="admin-tab" class="content-section">
+        <div id="tab-admin" style="display:none;">
             <div class="card">
-                <h3>SPIELER ANLEGEN</h3>
-                <input type="text" id="newName" placeholder="Vorname Nachname">
-                <input type="date" id="newBirth">
-                <select id="newSize">
-                    <option value="">Größe wählen</option>
-                    <option value="S">S</option><option value="M">M</option><option value="L">L</option>
-<option value="XL">XL</option><option value="XXL">XXL</option>
+                <h3>NEUER SPIELER</h3>
+                <input type="text" id="nName" placeholder="Name">
+                <input type="date" id="nBirth">
+                <select id="nSize">
+                    <option value="">Größe</option>
+                    <option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option>
                 </select>
-                <button onclick="addPlayer()" style="background:var(--success); color:white; border:none; padding:10px; width:100%; border-radius:5px; margin-top:10px; cursor:pointer;">SPEICHERN</button>
+                <button class="btn-green" onclick="addPlayer()">SPEICHERN</button>
             </div>
-
             <div class="card">
-                <h3>BEARBEITEN</h3>
-                <table id="adminTable">
-                    <thead>
-                        <tr><th>Spieler</th><th>Felgen</th><th>Monate</th><th>Aktion</th></tr>
-                    </thead>
-                    <tbody id="adminTableBody"></tbody>
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead><tr><th>Name</th><th>Felgen</th><th>Beitrag</th><th>X</th></tr></thead>
+                    <tbody id="adminBody"></tbody>
                 </table>
             </div>
-            <button onclick="firebase.auth().signOut()" style="background:grey; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; width:100%;">ABMELDEN</button>
+            <button onclick="firebase.auth().signOut()" style="background:grey; color:white; width:100%;">Abmelden</button>
         </div>
     </div>
 </div>
@@ -104,103 +80,79 @@
         authDomain: "mannschaftsmanager.firebaseapp.com",
         projectId: "mannschaftsmanager",
         storageBucket: "mannschaftsmanager.firebasestorage.app",
-        messagingSenderId: "332675116491",
+messagingSenderId: "332675116491",
         appId: "1:332675116491:web:9e0097d48023fb123b5a4e"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const auth = firebase.auth();
+    document.getElementById('status').innerText = "System bereit ✅";
 
-    // Login Funktion
-    function handleLogin() {
-        const mail = document.getElementById('email').value.trim();
-        const pass = document.getElementById('password').value;
-        
-        console.log("Versuche Login...");
-        auth.signInWithEmailAndPassword(mail, pass)
-            .then(() => { console.log("Login OK"); })
-            .catch(err => { alert("Fehler: " + err.message); });
+    function startLogin() {
+        const m = document.getElementById('email').value;
+        const p = document.getElementById('pass').value;
+        firebase.auth().signInWithEmailAndPassword(m, p)
+            .catch(err => alert("FEHLER: " + err.message));
     }
 
-    // Status Überprüfung
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            document.getElementById('auth-container').style.display = 'none';
-            document.getElementById('app-content').style.display = 'block';
-            syncData();
+    firebase.auth().onAuthStateChanged(user => {
+        if(user) {
+            document.getElementById('login-box').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            loadData();
         } else {
-            document.getElementById('auth-container').style.display = 'block';
-            document.getElementById('app-content').style.display = 'none';
+            document.getElementById('login-box').style.display = 'block';
+            document.getElementById('main-app').style.display = 'none';
         }
     });
 
-    // Tab Wechsel
-    function switchTab(sectionId, btnId) {
-        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(sectionId).classList.add('active');
-        document.getElementById(btnId).classList.add('active');
+    function showT(t) {
+        document.getElementById('tab-kader').style.display = (t=='kader'?'block':'none');
+        document.getElementById('tab-admin').style.display = (t=='admin'?'block':'none');
+        document.getElementById('b1').className = (t=='kader'?'tab active':'tab');
+        document.getElementById('b2').className = (t=='admin'?'tab active':'tab');
     }
 
-    // Spieler hinzufügen
     async function addPlayer() {
-        const n = document.getElementById('newName').value;
-        const b = document.getElementById('newBirth').value;
-        const s = document.getElementById('newSize').value;
-        if(!n) return alert("Name fehlt!");
+        const n = document.getElementById('nName').value;
+        if(!n) return;
         await db.collection("players").add({
-            name: n, birth: b, size: s, felgen: 0,
-            months: new Array(12).fill(false),
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            name: n, birth: document.getElementById('nBirth').value,
+            size: document.getElementById('nSize').value, felgen: 0,
+            months: new Array(12).fill(false), createdAt: new Date()
         });
-        document.getElementById('newName').value = "";
+        document.getElementById('nName').value = "";
     }
 
-    // Daten Synchronisation
-    function syncData() {
-        db.collection("players").orderBy("createdAt", "asc").onSnapshot(snap => {
-            const vBody = document.getElementById('viewTableBody');
-            const aBody = document.getElementById('adminTableBody');
-            vBody.innerHTML = ""; aBody.innerHTML = "";
-
+    function loadData() {
+        db.collection("players").orderBy("createdAt").onSnapshot(snap => {
+            const vB = document.getElementById('viewBody');
+            const aB = document.getElementById('adminBody');
+            vB.innerHTML = ""; aB.innerHTML = "";
             snap.forEach(doc => {
-                const p = doc.data();
-                const id = doc.id;
-                const paid = (p.months || []).filter(m => m).length;
-
-                vBody.innerHTML += `<tr>
-                    <td><strong>${p.name}</strong></td>
-                    <td>${p.birth || '-'}</td>
-                    <td>${p.size || '-'}</td>
-                    <td style="color:red; font-weight:bold;">${p.felgen || 0}</td>
-                    <td>${paid}/12</td>
-                </tr>`;
-let mH = '<div class="month-grid">';
-                const mN = ["J","F","M","A","M","J","J","A","S","O","N","D"];
+                const p = doc.data(); const id = doc.id;
+                vB.innerHTML += <tr><td>${p.name}</td><td>${p.birth||'-'}</td><td>${p.size||'-'}</td><td style="color:red">${p.felgen}</td></tr>;
+                
+                let mH = '<div class="month-grid">';
                 for(let i=0; i<12; i++) {
-                    mH += <div class="month-item">${mN[i]}<input type="checkbox" ${p.months && p.months[i]?'checked':''} onclick="toggleM('${id}',${i})"></div>;
+                    mH += <div>${i+1}<input type="checkbox" ${p.months[i]?'checked':''} onclick="toggleM('${id}',${i})"></div>;
                 }
                 mH += '</div>';
 
-                aBody.innerHTML += `<tr>
-                    <td style="text-align:left;">${p.name}</td>
-                    <td><button onclick="updF('${id}',${(p.felgen||0)-1})">-</button> ${p.felgen||0} <button onclick="updF('${id}',${(p.felgen||0)+1})">+</button></td>
-                    <td>${mH}</td>
-                    <td><button onclick="delP('${id}')">X</button></td>
-                </tr>`;
+                aB.innerHTML += `<tr><td>${p.name}</td>
+                    <td><button onclick="updF('${id}',${p.felgen-1})">-</button> ${p.felgen} <button onclick="updF('${id}',${p.felgen+1})">+</button></td>
+                    <td>${mH}</td><td><button onclick="delP('${id}')">X</button></td></tr>`;
             });
         });
     }
 
-    async function updF(id, v) { if(v<0) v=0; await db.collection("players").doc(id).update({felgen:v}); }
-    async function delP(id) { if(confirm("Löschen?")) await db.collection("players").doc(id).delete(); }
-    async function toggleM(id, idx) {
-        const ref = db.collection("players").doc(id);
-        const d = await ref.get();
-        let m = d.data().months || new Array(12).fill(false);
-        m[idx] = !m[idx];
-        await ref.update({months: m});
+    function updF(id, v) { if(v>=0) db.collection("players").doc(id).update({felgen:v}); }
+    function delP(id) { if(confirm("Löschen?")) db.collection("players").doc(id).delete(); }
+    async function toggleM(id, i) {
+        const r = db.collection("players").doc(id);
+        const d = await r.get();
+        let m = d.data().months; m[i] = !m[i];
+        r.update({months:m});
     }
 </script>
 </body>
