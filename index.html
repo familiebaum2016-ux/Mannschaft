@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mannschaftsmanager | Tim Baum</title>
+    <title>Mannschaftsmanager | Dart</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -13,12 +13,19 @@
         header { background: #1e272e; padding: 20px; border-bottom: 3px solid var(--accent); text-align: center; }
         .container { max-width: 1100px; margin: 20px auto; padding: 10px; }
         #auth-container { max-width: 400px; margin: 50px auto; background: #34495e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); text-align: center; }
-        input { padding: 10px; border-radius: 5px; border: none; margin: 5px; }
+        input, select { padding: 10px; border-radius: 5px; border: none; margin: 5px; width: 80%; }
         button { padding: 10px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; background: var(--primary); color: white; }
-        .card { background: white; color: black; padding: 20px; border-radius: 10px; margin-top: 20px; overflow-x: auto; shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        
+        /* Tabs Styling */
+        .tabs { display: flex; justify-content: center; margin-bottom: 20px; }
+        .tab-btn { background: #34495e; border: 1px solid var(--accent); border-radius: 0; flex: 1; max-width: 200px; }
+        .tab-btn.active { background: var(--accent); color: black; }
+
+        .card { background: white; color: black; padding: 20px; border-radius: 10px; margin-top: 10px; overflow-x: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 600px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
         th { background: #f2f2f2; font-size: 0.8rem; }
+        
         .btn-plus { background: #27ae60; color: white; padding: 5px 10px; margin: 2px; }
         .btn-minus { background: #e67e22; color: white; padding: 5px 12px; margin: 2px; }
         .btn-del { background: #c0392b; font-size: 0.7rem; padding: 5px; }
@@ -41,36 +48,64 @@
     </div>
 
     <div id="app-content" style="display:none;">
-        <div style="text-align:right; margin-bottom: 10px;">
-            <span id="userEmail" style="margin-right:15px; color:var(--accent);"></span>
-            <button onclick="firebase.auth().signOut()" style="background:grey; padding: 5px 10px;">Abmelden</button>
+        <div class="tabs">
+            <button id="btn-tab-kader" class="tab-btn active" onclick="showTab('kader')">KADER</button>
+            <button id="btn-tab-admin" class="tab-btn" onclick="showTab('admin')">VERWALTUNG</button>
         </div>
 
-        <div class="card">
-            <h3>NEUEN SPIELER HINZUFÜGEN</h3>
-            <input type="text" id="playerName" placeholder="Vorname Nachname">
-            <button onclick="addPlayer()">HINZUFÜGEN</button>
+        <div id="view-kader">
+            <div class="card">
+                <h3 style="margin-top:0;">AKTUELLER KADER</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Geburtstag</th>
+                            <th>Größe</th>
+                            <th>Felgen</th>
+                            <th>Beiträge</th>
+                        </tr>
+                    </thead>
+                    <tbody id="kaderViewBody"></tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="card">
-            <h3>SPIELERLISTE & MONATSBEITRÄGE</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Felgen-Zähler</th>
-                        <th>Beitrag (Jan - Dez)</th>
-                        <th>Aktion</th>
-                    </tr>
-                </thead>
-                <tbody id="playerTableBody"></tbody>
-            </table>
+        <div id="view-admin" style="display:none;">
+            <div class="card">
+                <h3>SPIELER HINZUFÜGEN</h3>
+                <input type="text" id="playerName" placeholder="Vorname Nachname">
+                <input type="date" id="playerBirth">
+                <select id="playerSize">
+                    <option value="">Größe wählen</option>
+<option value="S">S</option><option value="M">M</option><option value="L">L</option>
+                    <option value="XL">XL</option><option value="XXL">XXL</option>
+                </select>
+                <button onclick="addPlayer()">SPEICHERN</button>
+            </div>
+
+            <div class="card">
+                <h3>EINSTELLUNGEN</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name / Info</th>
+                            <th>Felgen</th>
+                            <th>Beitrag</th>
+                            <th>Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="playerTableBody"></tbody>
+                </table>
+            </div>
+            <div style="text-align:center; margin-top:20px;">
+                <button onclick="firebase.auth().signOut()" style="background:grey;">Abmelden</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // DEIN NEUER KEY IST JETZT HIER DRIN
     const firebaseConfig = {
         apiKey: "AIzaSyBMtWxbRPX4hBtBPi-Yn6uYt6I-ud5SyY8",
         authDomain: "mannschaftsmanager.firebaseapp.com",
@@ -84,9 +119,7 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    // Login Logik
-    document.
-getElementById('loginBtn').addEventListener('click', () => {
+    document.getElementById('loginBtn').addEventListener('click', () => {
         const email = document.getElementById('email').value.trim();
         const pass = document.getElementById('password').value;
         auth.signInWithEmailAndPassword(email, pass).catch(err => alert("Fehler: " + err.message));
@@ -96,7 +129,6 @@ getElementById('loginBtn').addEventListener('click', () => {
         if (user) {
             document.getElementById('auth-container').style.display = 'none';
             document.getElementById('app-content').style.display = 'block';
-            document.getElementById('userEmail').innerText = user.email;
             loadPlayers();
         } else {
             document.getElementById('auth-container').style.display = 'block';
@@ -104,73 +136,90 @@ getElementById('loginBtn').addEventListener('click', () => {
         }
     });
 
-    // Spieler in die Datenbank schreiben
+    // Tab-Umschaltung
+    function showTab(type) {
+        if(type === 'kader') {
+            document.getElementById('view-kader').style.display = 'block';
+            document.getElementById('view-admin').style.display = 'none';
+            document.getElementById('btn-tab-kader').classList.add('active');
+            document.getElementById('btn-tab-admin').classList.remove('active');
+        } else {
+            document.getElementById('view-kader').style.display = 'none';
+            document.getElementById('view-admin').style.display = 'block';
+            document.getElementById('btn-tab-admin').classList.add('active');
+            document.getElementById('btn-tab-kader').classList.remove('active');
+        }
+    }
+
     async function addPlayer() {
         const name = document.getElementById('playerName').value;
+        const birth = document.getElementById('playerBirth').value;
+        const size = document.getElementById('playerSize').value;
         if (!name) return;
         try {
             await db.collection("players").add({
-                name: name,
-                felgen: 0,
-                months: new Array(12).fill(false),
+                name: name, birth: birth, size: size,
+                felgen: 0, months: new Array(12).fill(false),
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             document.getElementById('playerName').value = "";
-        } catch (e) { alert("Fehler beim Speichern: " + e.message); }
+            document.getElementById('playerBirth').value = "";
+        } catch (e) { alert("Fehler: " + e.message); }
     }
 
-    // Spielerliste live laden
     function loadPlayers() {
         db.collection("players").orderBy("createdAt", "asc").onSnapshot(snapshot => {
-            const tbody = document.getElementById('playerTableBody');
-            tbody.innerHTML = "";
+            const adminBody = document.getElementById('playerTableBody');
+            const kaderBody = document.getElementById('kaderViewBody');
+            adminBody.innerHTML = "";
+            kaderBody.innerHTML = "";
+
             snapshot.forEach(doc => {
-                const p = doc.data();
+const p = doc.data();
                 const id = doc.id;
                 const monate = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
-                
+                const bezahltCount = (p.months || []).filter(m => m).length;
+
+                // 1. ANSICHT (KADER)
+                kaderBody.innerHTML += `
+                    <tr>
+                        <td><strong>${p.name}</strong></td>
+                        <td>${p.birth || '-'}</td>
+                        <td>${p.size || '-'}</td>
+                        <td style="color:red; font-weight:bold;">${p.felgen || 0}</td>
+                        <td>${bezahltCount}/12 bezahlt</td>
+                    </tr>`;
+
+                // 2. BEARBEITEN (ADMIN)
                 let monthHtml = '<div class="month-grid">';
                 for(let i=0; i<12; i++) {
-                    monthHtml += `
-                        <div>
-                            <label>${monate[i]}</label>
-                            <input type="checkbox" ${p.months && p.months[i] ? 'checked' : ''} 
-                            onclick="toggleMonth('${id}', ${i})">
-                        </div>`;
+                    monthHtml += <div><label>${monate[i]}</label><input type="checkbox" ${p.months && p.months[i] ? 'checked' : ''} onclick="toggleMonth('${id}', ${i})"></div>;
                 }
                 monthHtml += '</div>';
 
-                tbody.innerHTML += `
+                adminBody.innerHTML += `
                     <tr>
-                        <td><strong>${p.name}</strong></td>
+                        <td style="text-align:left;"><strong>${p.name}</strong><br><small>${p.birth  ''} | Gr: ${p.size  ''}</small></td>
                         <td>
                             <button class="btn-minus" onclick="updateFelgen('${id}', ${p.felgen - 1})">-</button>
-                            <span style="font-size:1.3rem; font-weight:bold; margin:0 10px;">${p.felgen || 0}</span>
+                            <span style="font-weight:bold;">${p.felgen || 0}</span>
                             <button class="btn-plus" onclick="updateFelgen('${id}', ${p.felgen + 1})">+</button>
                         </td>
                         <td>${monthHtml}</td>
                         <td><button class="btn-del" onclick="deletePlayer('${id}')">X</button></td>
-                    </tr>
-                `;
+                    </tr>`;
             });
         });
     }
 
-    async function updateFelgen(id, val) {
-        if(val < 0) val = 0;
-        await db.collection("players").doc(id).update({ felgen: val });
-    }
-
+    async function updateFelgen(id, val) { if(val < 0) val = 0; await db.collection("players").doc(id).update({ felgen: val }); }
+    async function deletePlayer(id) { if(confirm("Löschen?")) await db.collection("players").doc(id).delete(); }
     async function toggleMonth(id, index) {
         const docRef = db.collection("players").doc(id);
         const doc = await docRef.get();
         let months = doc.data().months || new Array(12).fill(false);
         months[index] = !months[index];
         await docRef.update({ months: months });
-    }
-
-    async function deletePlayer(id) {
-        if(confirm("Spieler wirklich löschen?")) await db.collection("players").doc(id).delete();
     }
 </script>
 </body>
