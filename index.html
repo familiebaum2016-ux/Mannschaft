@@ -15,7 +15,7 @@
         #auth-container { max-width: 400px; margin: 50px auto; background: #34495e; padding: 30px; border-radius: 15px; border: 2px solid var(--accent); }
         input { padding: 12px; border-radius: 8px; border: none; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
         button { padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; width: 100%; background: var(--primary); color: white; }
-        #app-content { display: none; padding: 20px; }
+        #app-content { display: none; padding: 20px; background: white; color: black; margin: 20px; border-radius: 15px; }
     </style>
 </head>
 <body>
@@ -23,7 +23,6 @@
 <header>
     <img src="logo.png" alt="Logo" class="logo-img">
     <h2 style="color:var(--accent); margin:0;">MANNSCHAFTSMANAGER</h2>
-    <p style="font-size:0.8rem;">Entwickelt von Tim Baum</p>
 </header>
 
 <div id="auth-container">
@@ -34,34 +33,20 @@
 </div>
 
 <div id="app-content">
-    <h3 style="color:var(--accent);">Erfolgreich eingeloggt!</h3>
-    <button onclick="firebase.auth().signOut()" style="width:auto; background:grey; padding: 5px 15px;">Abmelden</button>
-    <hr>
-    <p>Hier kannst du gleich deine Spieler verwalten.</p>
+    <h2 style="color: #c0392b;">WILLKOMMEN IM KADER!</h2>
+    <p>Der Login war erfolgreich. Hier kommen bald deine Spielerdaten hin.</p>
+    <button onclick="firebase.auth().signOut()" style="background: grey; width: auto; padding: 10px 20px;">Abmelden</button>
 </div>
 
 <script>
-   // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBDivWSuOeTQqZVJQshWGIxM1xifbh9-kA",
-  authDomain: "mannschaftsmanager.firebaseapp.com",
-  projectId: "mannschaftsmanager",
-  storageBucket: "mannschaftsmanager.firebasestorage.app",
-  messagingSenderId: "332675116491",
-  appId: "1:332675116491:web:9e0097d48023fb123b5a4e",
-  measurementId: "G-2396882MW0"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+    const firebaseConfig = {
+        apiKey: "AIzaSyBDivWSuOeTQqZJVJQshWGIxM1xifbh9-kA",
+        authDomain: "mannschaftsmanager.firebaseapp.com",
+        projectId: "mannschaftsmanager",
+        storageBucket: "mannschaftsmanager.firebasestorage.app",
+        messagingSenderId: "332675116491",
+        appId: "1:332675116491:web:9e0097d48023fb123b5a4e"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
@@ -70,19 +55,22 @@ const analytics = getAnalytics(app);
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
         try {
+            // Login versuchen
             await auth.signInWithEmailAndPassword(email, pass);
         } catch (e) {
-            // Falls Account nicht existiert, wird er erstellt
-            if(e.code === 'auth/invalid-credential' || e.code === 'auth/user-not-found') {
+            // Falls Account neu, Registrierung versuchen
+            if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
                 try {
                     await auth.createUserWithEmailAndPassword(email, pass);
                 } catch (regErr) { alert("Fehler: " + regErr.message); }
-            } else { alert("Login-Fehler: " + e.message); }
+            } else { alert("Fehler: " + e.message); }
         }
     }
 
+    // DAS HIER ÜBERWACHT DEN LOGIN-STATUS:
     auth.onAuthStateChanged(user => {
         if (user) {
+            console.log("User ist eingeloggt!");
             document.getElementById('auth-container').style.display = 'none';
             document.getElementById('app-content').style.display = 'block';
         } else {
