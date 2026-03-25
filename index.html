@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mannschaftsmanager Pro</title>
+    <title>Mannschaftsmanager | Dart-Freunde</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -13,28 +13,37 @@
         header { background: #1e272e; padding: 15px; border-bottom: 4px solid var(--accent); text-align: center; }
         .logo-img { max-width: 120px; height: auto; }
         .container { max-width: 1200px; margin: 20px auto; padding: 10px; }
-        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { background: #34495e; color: white; padding: 12px 25px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; flex: 1; max-width: 200px; }
+        
+        /* Tabs */
+        .tabs { display: flex; justify-content: center; gap: 5px; margin-bottom: 20px; }
+        .tab-btn { background: #34495e; color: white; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; flex: 1; max-width: 200px; }
         .tab-btn.active { background: var(--light); color: var(--dark); border-bottom: 4px solid var(--accent); }
         .content-section { display: none; }
         .content-section.active { display: block; }
+
+        /* Design */
         .card { background: white; color: #2d3436; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th { background: #f1f2f6; padding: 10px; font-size: 0.8rem; border-bottom: 2px solid #dfe4ea; }
+        h3 { margin-top: 0; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th { background: #f1f2f6; padding: 10px; font-size: 0.8rem; }
         td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
-        .admin-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 15px; }
-        input, select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; width: 100%; box-sizing: border-box; }
+
+        /* Admin Felder */
+        .admin-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        input, select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 100%; box-sizing: border-box; }
+        
         .month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
-        .month-item { font-size: 0.65rem; display: flex; flex-direction: column; align-items: center; }
-        .btn-small { padding: 4px 10px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; }
-        #auth-container { max-width: 400px; margin: 100px auto; background: #34495e; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid var(--accent); }
+        .month-item { font-size: 0.6rem; display: flex; flex-direction: column; align-items: center; }
+        .month-item input { width: 16px; height: 16px; margin: 2px; }
+
+        #auth-container { max-width: 400px; margin: 80px auto; background: #34495e; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid var(--accent); }
     </style>
 </head>
 <body>
 
 <header>
     <img src="logo.png" alt="Logo" class="logo-img">
-    <div style="color:var(--accent); font-weight:bold; margin-top:5px;">MANNSCHAFTS-PORTAL</div>
+    <div style="color:var(--accent); font-weight:bold;">MANNSCHAFTS-PORTAL</div>
 </header>
 
 <div class="container">
@@ -42,13 +51,13 @@
         <h2>LOGIN</h2>
         <input type="email" id="email" placeholder="E-Mail" value="tim.baum210690@gmail.com">
         <input type="password" id="password" placeholder="Passwort">
-        <button id="loginBtn" style="margin-top:15px; background:var(--success); padding:12px; width:100%; border-radius:8px; border:none; color:white; font-weight:bold; cursor:pointer;">EINLOGGEN</button>
+        <button id="loginBtn" style="margin-top:15px; background:var(--success); padding:12px; width:100%; border-radius:8px; border:none; color:white; font-weight:bold; cursor:pointer;">JETZT EINLOGGEN</button>
     </div>
 
     <div id="app-content" style="display:none;">
         <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('kader-tab')">KADER</button>
-            <button class="tab-btn" onclick="showTab('admin-tab')">VERWALTUNG</button>
+            <button id="btn-kader" class="tab-btn active" onclick="showTab('kader-tab')">KADER</button>
+            <button id="btn-admin" class="tab-btn" onclick="showTab('admin-tab')">VERWALTUNG</button>
         </div>
 
         <div id="kader-tab" class="content-section active">
@@ -61,45 +70,45 @@
                             <th>Geburtstag</th>
                             <th>Trikot</th>
                             <th>Felgen</th>
-                            <th>Beitrag Status</th>
-                        </tr>
+                            <th>Beiträge</th>
+</tr>
                     </thead>
                     <tbody id="viewTableBody"></tbody>
-</table>
+                </table>
             </div>
         </div>
 
         <div id="admin-tab" class="content-section">
             <div class="card">
-                <h3>NEUEN SPIELER ANLEGEN</h3>
+                <h3>SPIELER ANLEGEN</h3>
                 <div class="admin-inputs">
                     <input type="text" id="newName" placeholder="Name">
                     <input type="date" id="newBirth">
                     <select id="newSize">
                         <option value="">Größe</option>
-                        <option value="S">S</option>
-                        <option value="M">M</option>
-                        <option value="L">L</option>
-                        <option value="XL">XL</option>
-                        <option value="XXL">XXL</option>
+                        <option value="S">S</option><option value="M">M</option><option value="L">L</option>
+                        <option value="XL">XL</option><option value="XXL">XXL</option>
                     </select>
-                    <button onclick="addPlayer()" style="background:var(--success); border-radius:5px; border:none; color:white; cursor:pointer;">Hinzufügen</button>
+                    <button onclick="addPlayer()" style="background:var(--success); color:white; border:none; border-radius:5px; cursor:pointer;">Hinzufügen</button>
                 </div>
             </div>
             <div class="card">
-                <h3>DATEN BEARBEITEN</h3>
-                <table>
-                    <thead><tr><th>Spieler / Info</th><th>Felgen</th><th>Beiträge (Jan-Dez)</th><th>Aktion</th></tr></thead>
-                    <tbody id="adminTableBody"></tbody>
-                </table>
+                <h3>DATEN VERWALTEN</h3>
+                <div style="overflow-x:auto;">
+                    <table id="adminTable">
+                        <thead>
+                            <tr><th>Spieler</th><th>Felgen</th><th>Jan-Dez</th><th>Aktion</th></tr>
+                        </thead>
+                        <tbody id="adminTableBody"></tbody>
+                    </table>
+                </div>
             </div>
-            <button onclick="firebase.auth().signOut()" style="background:grey; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">Abmelden</button>
+            <button onclick="firebase.auth().signOut()" style="background:grey; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; width:100%;">Abmelden</button>
         </div>
     </div>
 </div>
 
 <script>
-    // Konfiguration
     const firebaseConfig = {
         apiKey: "AIzaSyBMtWxbRPX4hBtBPi-Yn6uYt6I-ud5SyY8",
         authDomain: "mannschaftsmanager.firebaseapp.com",
@@ -113,12 +122,19 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    // Login Event
+    // Login Logik mit Button-Feedback
     document.getElementById('loginBtn').addEventListener('click', () => {
+        const btn = document.getElementById('loginBtn');
+        btn.innerText = "PRÜFE...";
         const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        auth.signInWithEmailAndPassword(email, password)
-            .catch(error => alert("Login fehlgeschlagen: " + error.message));
+        const pass = document.getElementById('password').value;
+        
+        auth.signInWithEmailAndPassword(email, pass)
+            .then(() => { btn.innerText = "ERFOLG!"; })
+            .catch(err => { 
+                alert("Fehler: " + err.message); 
+                btn.innerText = "JETZT EINLOGGEN";
+            });
     });
 
     auth.onAuthStateChanged(user => {
@@ -136,7 +152,8 @@
         document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
-        event.currentTarget.classList.add('active');
+        if(tabId === 'kader-tab') document.getElementById('btn-kader').classList.add('active');
+        else document.getElementById('btn-admin').classList.add('active');
     }
 
     async function addPlayer() {
@@ -148,7 +165,8 @@
             name, birth, size,
             felgen: 0,
             months: new Array(12).fill(false),
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            createdAt: firebase.
+firestore.FieldValue.serverTimestamp()
         });
         document.getElementById('newName').value = "";
     }
@@ -158,19 +176,22 @@
             const viewBody = document.getElementById('viewTableBody');
             const adminBody = document.getElementById('adminTableBody');
             viewBody.innerHTML = ""; adminBody.innerHTML = "";
+            
             snap.forEach(doc => {
                 const p = doc.data();
-const id = doc.id;
-                const paidCount = (p.months || []).filter(m => m).length;
+                const id = doc.id;
+                const paid = (p.months || []).filter(m => m).length;
 
+                // Kader Ansicht
                 viewBody.innerHTML += `<tr>
                     <td><strong>${p.name}</strong></td>
                     <td>${p.birth || '-'}</td>
                     <td>${p.size || '-'}</td>
                     <td style="color:red; font-weight:bold;">${p.felgen || 0}</td>
-                    <td>${paidCount}/12 bezahlt</td>
+                    <td>${paid}/12 bezahlt</td>
                 </tr>`;
 
+                // Admin Ansicht
                 let mHtml = '<div class="month-grid">';
                 const mNames = ["J","F","M","A","M","J","J","A","S","O","N","D"];
                 for(let i=0; i<12; i++) {
@@ -179,17 +200,17 @@ const id = doc.id;
                 mHtml += '</div>';
 
                 adminBody.innerHTML += `<tr>
-                    <td style="text-align:left;"><strong>${p.name}</strong><br><small>${p.birth  ''} | ${p.size  ''}</small></td>
-                    <td><button onclick="updF('${id}',${(p.felgen||0)-1})">-</button> ${p.felgen||0} <button onclick="updF('${id}',${(p.felgen||0)+1})">+</button></td>
+                    <td style="text-align:left;"><strong>${p.name}</strong><br><small>${p.birth||''} | Gr: ${p.size||''}</small></td>
+                    <td><button onclick="updF('${id}',${(p.felgen||0)-1})">-</button> <strong>${p.felgen||0}</strong> <button onclick="updF('${id}',${(p.felgen||0)+1})">+</button></td>
                     <td>${mHtml}</td>
-                    <td><button onclick="delP('${id}')">X</button></td>
+                    <td><button onclick="delP('${id}')" style="font-size:0.6rem;">LÖSCHEN</button></td>
                 </tr>`;
             });
         });
     }
 
     async function updF(id, v) { if(v<0) v=0; await db.collection("players").doc(id).update({felgen: v}); }
-    async function delP(id) { if(confirm("Löschen?")) await db.collection("players").doc(id).delete(); }
+    async function delP(id) { if(confirm("Spieler löschen?")) await db.collection("players").doc(id).delete(); }
     async function toggleM(id, idx) {
         const ref = db.collection("players").doc(id);
         const d = await ref.get();
