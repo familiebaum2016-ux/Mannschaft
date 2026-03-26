@@ -1,192 +1,227 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team-Manager Lokal</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; color: #2d3436; }
-        
-        /* Navigation */
-        .nav-tabs { display: flex; gap: 5px; margin-bottom: 15px; background: #fff; padding: 8px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 100%; max-width: 500px; justify-content: center; position: sticky; top: 10px; z-index: 100; }
-        .nav-tab { padding: 10px 15px; cursor: pointer; border-radius: 8px; color: #64748b; font-weight: 600; transition: 0.2s; font-size: 0.85rem; border: 1px solid transparent; }
-        .nav-tab.active { background-color: #00b894; color: white; border-color: #00b894; }
-        
-        /* Container */
-        .container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); width: 100%; max-width: 800px; display: none; box-sizing: border-box; }
-        .container.active { display: block; }
-        
-        /* Formular Elemente */
-        input { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
-        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; transition: 0.2s; }
-        .btn-primary { background: #00b894; color: white; width: 100%; }
-        .btn-add-val { background: #0984e3; color: white; padding: 8px 15px; width: auto; }
-        
-        /* Tabelle */
-        .table-wrapper { overflow-x: auto; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; min-width: 400px; }
-        th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #edf2f7; font-size: 0.85rem; }
-        th { background: #f8fafc; color: #475569; text-transform: uppercase; font-size: 0.7rem; }
-        
-        /* Edit Cards */
-        .edit-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-        .month-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 10px 0; }
-        .month-item { font-size: 0.8rem; display: flex; align-items: center; gap: 5px; }
-        .month-item input { width: 18px; height: 18px; margin: 0; cursor: pointer; }
-        
-        .felgen-box { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; padding: 10px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; }
-        .felgen-box input { margin: 0; width: 80px; }
-
-        .badge { padding: 3px 6px; border-radius: 4px; font-size: 0.65rem; background: #e2e8f0; margin: 1px; display: inline-block; color: #475569; }
-        .badge.paid { background: #00b894; color: white; }
-    </style>
+<meta charset="UTF-8">
+<title>Dart Team Manager</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #111;
+    color: #fff;
+}
+header {
+    background: #000;
+    padding: 15px;
+    text-align: center;
+    font-size: 24px;
+    color: red;
+}
+nav {
+    display: flex;
+    background: #1a1a1a;
+}
+nav button {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    background: #1a1a1a;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
+nav button.active {
+    background: red;
+}
+section {
+    display: none;
+    padding: 20px;
+}
+section.active {
+    display: block;
+}
+input, select {
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+}
+button.action {
+    background: red;
+    color: white;
+    padding: 10px;
+    border: none;
+    margin-top: 10px;
+    cursor: pointer;
+    width: 100%;
+}
+.player-card {
+    background: #1a1a1a;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 10px;
+}
+.months {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+</style>
 </head>
 <body>
 
-    <div class="nav-tabs">
-        <div id="tab-btn-add" class="nav-tab active" onclick="showTab('add-tab')">👤 Spieler</div>
-        <div id="tab-btn-kader" class="nav-tab" onclick="showTab('kader-tab')">📋 Kader</div>
-        <div id="tab-btn-edit" class="nav-tab" onclick="showTab('edit-tab')">⚙️ Bearbeiten</div>
-    </div>
+<header>Dart Team Manager</header>
 
-    <div id="add-tab" class="container active">
-        <h2 style="margin-top:0;">Spieler anlegen</h2>
-        <input type="text" id="pName" placeholder="Name eingeben...">
-        <button class="btn btn-primary" onclick="addPlayer()">HINZUFÜGEN</button>
-        <div id="pList" style="margin-top: 20px;"></div>
-    </div>
+<nav>
+<button onclick="showTab('spieler')" class="active">Spieler</button>
+<button onclick="showTab('kader')">Kader</button>
+<button onclick="showTab('bearbeiten')">Bearbeiten</button>
+</nav>
 
-    <div id="kader-tab" class="container">
-        <h2 style="margin-top:0;">📋 Kaderansicht</h2>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr><th>Name</th><th>Beiträge</th><th>Felgen</th><th>Info</th></tr>
-                </thead>
-                <tbody id="kaderBody"></tbody>
-            </table>
-        </div>
-    </div>
-<div id="edit-tab" class="container">
-        <h2 style="margin-top:0;">📝 Verwalten</h2>
-        <div id="editContainer"></div>
-    </div>
+<section id="spieler" class="active">
+<h2>Spieler hinzufügen</h2>
+<input type="text" id="name" placeholder="Name">
+<input type="date" id="geburtstag">
+<input type="text" id="trikot" placeholder="Trikotgröße">
+<input type="number" id="beitrag" placeholder="Monatsbeitrag €">
+<input type="number" id="felgen" placeholder="Felgenwürfe">
+<button class="action" onclick="addPlayer()">Hinzufügen</button>
+
+<h2>Spieler löschen</h2>
+<select id="deleteSelect"></select>
+<button class="action" onclick="deletePlayer()">Löschen</button>
+</section>
+
+<section id="kader">
+<h2>Kader</h2>
+<div id="kaderListe"></div>
+</section>
+
+<section id="bearbeiten">
+<h2>Spieler bearbeiten</h2>
+<select id="editSelect" onchange="loadPlayer()"></select>
+
+<input type="text" id="editTrikot" placeholder="Trikotgröße">
+<input type="number" id="editBeitrag" placeholder="Monatsbeitrag">
+<input type="number" id="editFelgen" placeholder="Felgenwürfe">
+
+<h3>Monatsbeiträge</h3>
+<div class="months" id="monthsContainer"></div>
+
+<button class="action" onclick="saveChanges()">Speichern</button>
+</section>
 
 <script>
-    // DATEN AUS LOCALSTORAGE LADEN
-    let players = JSON.parse(localStorage.getItem('teamData_v1')) || [];
-    const months = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
+let players = JSON.parse(localStorage.getItem("players")) || [];
 
-    function addPlayer() {
-        const input = document.getElementById('pName');
-        const name = input.value.trim();
-        if(!name) return;
-        
-        players.push({
-            id: Date.now(),
-            name: name,
-            monthsPaid: [],
-            felgen: 0,
-            birth: '',
-            size: ''
-        });
-        
-        input.value = '';
-        saveAndRender();
-    }
+const months = ["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
 
-    function saveAndRender() {
-        localStorage.setItem('teamData_v1', JSON.stringify(players));
-        render();
-    }
+function saveData() {
+    localStorage.setItem("players", JSON.stringify(players));
+}
 
-    function render() {
-        // Tab 1: Liste
-        document.getElementById('pList').innerHTML = players.map(p => `
-            <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #eee; background:#fff; margin-bottom:5px; border-radius:8px;">
-                <span style="font-weight:600;">${p.name}</span>
-                <span onclick="deletePlayer(${p.id})" style="color:#ff7675; cursor:pointer; font-weight:bold;">Löschen</span>
-            </div>
-        `).join('');
+function showTab(tab) {
+    document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
+    document.getElementById(tab).classList.add("active");
 
-        // Tab 2: Kader
-        document.getElementById('kaderBody').innerHTML = players.map(p => `
-            <tr>
-                <td><strong>${p.name}</strong></td>
-                <td>${months.map((m, i) => `<span class="badge ${p.monthsPaid.includes(i) ? 'paid' : ''}">${m}</span>`).join('')}</td>
-                <td style="color:#0984e3; font-weight:bold; font-size:1.1rem;">${p.felgen}</td>
-                <td><small>${p.birth  '-'} / ${p.size  '-'}</small></td>
-            </tr>
-        `).join('');
+    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+    event.target.classList.add("active");
 
-        // Tab 3: Edit
-        document.getElementById('editContainer').innerHTML = players.map(p => `
-            <div class="edit-card">
-                <h3 style="margin:0 0 10px 0;">${p.name}</h3>
-                <div class="month-grid">
-                    ${months.map((m, i) => `
-                        <div class="month-item">
-                            <input type="checkbox" ${p.monthsPaid.includes(i) ? 'checked' : ''} onchange="toggleMonth(${p.id}, ${i})"> ${m}
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="felgen-box">
-                    <input type="number" id="f-add-${p.id}" placeholder="+ Felgen">
-                    <button class="btn btn-add-val" onclick="addFelgen(${p.id})">OK</button>
-                    <input type="date" value="${p.birth}" onchange="updateField(${p.id}, 'birth', this.value)" style="width:120px;">
-                    <input type="text" value="${p.size}" onchange="updateField(${p.id}, 'size', this.value)" placeholder="Größe" style="width:70px;">
-                </div>
-            </div>
-        `).join('');
-    }
+    updateUI();
+}
 
-    // LOGIK
-    function toggleMonth(id, mIdx) {
-        let p = players.find(x => x.id === id);
-        let pos = p.monthsPaid.indexOf(mIdx);
-        if(pos > -1) p.monthsPaid.splice(pos, 1);
-        else p.monthsPaid.push(mIdx);
-        saveAndRender();
-    }
+function addPlayer() {
+    const player = {
+        name: name.value,
+        geburtstag: geburtstag.value,
+        trikot: trikot.value,
+        beitrag: beitrag.value,
+        felgen: felgen.value,
+        months: Array(12).fill(false)
+    };
+    players.push(player);
+    saveData();
+    updateUI();
+}
 
-    function addFelgen(id) {
-        let input = document.getElementById(`f-add-${id}`);
-        let val = parseInt(input.value);
-        if(!isNaN(val)) {
-            players.find(x => x.id === id).felgen += val;
-            input.value = '';
-            saveAndRender();
-        }
-    }
+function deletePlayer() {
+    const index = deleteSelect.value;
+    players.splice(index,1);
+    saveData();
+    updateUI();
+}
 
-    function updateField(id, field, val) {
-        players.find(x => x.id === id)[field] = val;
-        localStorage.setItem('teamData_v1', JSON.stringify(players));
-    }
+function updateUI() {
+    const kader = document.getElementById("kaderListe");
+    kader.innerHTML = "";
 
-    function deletePlayer(id) {
-        if(confirm("Löschen?")) {
-            players = players.filter(x => x.id !== id);
-            saveAndRender();
-        }
-    }
+    const deleteSel = document.getElementById("deleteSelect");
+    const editSel = document.getElementById("editSelect");
 
-    function showTab(tabId) {
-        document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        
-        document.getElementById(tabId).classList.add('active');
-        
-        // Buttons aktiv setzen
-        if(tabId === 'add-tab') document.getElementById('tab-btn-add').classList.add('active');
-        if(tabId === 'kader-tab') document.getElementById('tab-btn-kader').classList.add('active');
-        if(tabId === 'edit-tab') document.getElementById('tab-btn-edit').classList.add('active');
-        
-        render();
-    }
+    deleteSel.innerHTML = "";
+    editSel.innerHTML = "";
 
-    // START
-    render();
+    players.forEach((p,i)=>{
+        // Kader Anzeige
+        kader.innerHTML += `
+        <div class="player-card">
+            <strong>${p.name}</strong><br>
+            Geburtstag: ${p.geburtstag}<br>
+            Trikot: ${p.trikot}<br>
+            Beitrag: ${p.beitrag}€<br>
+            Felgenwürfe: ${p.felgen}<br>
+        </div>`;
+
+        deleteSel.
+innerHTML += <option value="${i}">${p.name}</option>;
+        editSel.innerHTML += <option value="${i}">${p.name}</option>;
+    });
+
+    loadPlayer();
+}
+
+function loadPlayer() {
+    const index = editSelect.value;
+    if (!players[index]) return;
+
+    const p = players[index];
+
+    editTrikot.value = p.trikot;
+    editBeitrag.value = p.beitrag;
+    editFelgen.value = p.felgen;
+
+    const container = document.getElementById("monthsContainer");
+    container.innerHTML = "";
+
+    months.forEach((m,i)=>{
+        container.innerHTML += `
+        <label>
+            <input type="checkbox" ${p.months[i] ? "checked":""} onchange="toggleMonth(${i})">
+            ${m}
+        </label>`;
+    });
+}
+
+function toggleMonth(i) {
+    const index = editSelect.value;
+    players[index].months[i] = !players[index].months[i];
+    saveData();
+}
+
+function saveChanges() {
+    const index = editSelect.value;
+    const p = players[index];
+
+    p.trikot = editTrikot.value;
+    p.beitrag = editBeitrag.value;
+    p.felgen = editFelgen.value;
+
+    saveData();
+    updateUI();
+}
+
+updateUI();
 </script>
+
 </body>
 </html>
