@@ -3,228 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team-Manager Pro 2026</title>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <title>Mein Team-Manager (Lokal)</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        
-        /* Login Styling */
-        #login-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; margin-top: 50px; }
-        #login-container input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        
-        /* App Styling */
-        .nav-tabs { display: flex; gap: 5px; margin-bottom: 20px; background: #fff; padding: 10px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .nav-tab { padding: 12px 25px; cursor: pointer; border-radius: 8px; color: #64748b; font-weight: 600; transition: 0.3s; }
+        .nav-tabs { display: flex; gap: 5px; margin-bottom: 20px; background: #fff; padding: 10px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); width: 100%; max-width: 600px; justify-content: center; }
+        .nav-tab { padding: 12px 20px; cursor: pointer; border-radius: 8px; color: #64748b; font-weight: 600; transition: 0.3s; font-size: 0.9rem; }
         .nav-tab.active { background-color: #00b894; color: white; }
         
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 1000px; display: none; }
+        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 900px; display: none; box-sizing: border-box; }
         .container.active { display: block; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #edf2f7; }
-        th { background: #f8fafc; color: #475569; text-transform: uppercase; font-size: 0.75rem; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #edf2f7; font-size: 0.9rem; }
+        th { background: #f8fafc; color: #475569; text-transform: uppercase; font-size: 0.7rem; }
         
-        .edit-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px; color: #2d3436; }
-        .month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 10px 0; }
-        .month-item { font-size: 0.8rem; display: flex; align-items: center; gap: 5px; }
+        .edit-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .month-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; }
+        .month-item { font-size: 0.75rem; display: flex; align-items: center; gap: 3px; color: #2d3436; }
         
-        .felgen-box { display: flex; gap: 10px; align-items: center; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; }
-        input[type="number"], input[type="text"], input[type="date"] { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
+        .felgen-box { display: flex; gap: 8px; align-items: center; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; flex-wrap: wrap; }
+        input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
         
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .btn-primary { background: #00b894; color: white; width: 100%; }
+        .btn { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: #00b894; color: white; width: 100%; margin-top: 10px; }
         .btn-add-val { background: #0984e3; color: white; padding: 5px 10px; font-size: 0.8rem; }
+        .btn-del { background: none; color: #ff7675; border: none; cursor: pointer; font-size: 0.8rem; }
         
-        .badge { padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; background: #e2e8f0; margin-right: 2px; display: inline-block; margin-bottom: 2px; }
+        .badge { padding: 2px 5px; border-radius: 4px; font-size: 0.65rem; background: #e2e8f0; margin-right: 1px; display: inline-block; }
         .badge.paid { background: #00b894; color: white; }
     </style>
 </head>
 <body>
 
-    <div id="login-container">
-        <h2 style="color: #2d3436;">Team Login</h2>
-        <input type="email" id="email" value="tim.baum210690@gmail.com">
-        <input type="password" id="password" placeholder="Passwort">
-        <button class="btn btn-primary" id="loginBtn">Einloggen</button>
+    <div class="nav-tabs">
+        <div id="t1" class="nav-tab active" onclick="showTab('add-tab')">👤 Spieler</div>
+        <div id="t2" class="nav-tab" onclick="showTab('kader-tab')">📋 Kader</div>
+        <div id="t3" class="nav-tab" onclick="showTab('edit-tab')">⚙️ Bearbeiten</div>
     </div>
 
-    <div id="app-content" style="display:none; width: 100%; max-width: 1000px;">
-        <div class="nav-tabs">
-            <div id="t1" class="nav-tab active" onclick="showTab('add-tab')">👤 Spieler</div>
-            <div id="t2" class="nav-tab" onclick="showTab('kader-tab')">📋 Kader</div>
-            <div id="t3" class="nav-tab" onclick="showTab('edit-tab')">⚙️ Bearbeiten</div>
-            <div class="nav-tab" onclick="firebase.auth().signOut()" style="color:#e17055;">Logout</div>
-        </div>
+    <div id="add-tab" class="container active">
+        <h2>Spieler anlegen</h2>
+        <p style="font-size: 0.8rem; color: #636e72;">Daten werden nur auf diesem Gerät gespeichert.</p>
+        <input type="text" id="pName" placeholder="Name eingeben..." style="width: 100%; box-sizing: border-box;">
+        <button class="btn btn-primary" onclick="addPlayer()">Hinzufügen</button>
+        
+        <div id="pList" style="margin-top: 20px;"></div>
+    </div>
 
-        <div id="add-tab" class="container active">
-            <h2>Neuen Spieler anlegen</h2>
-            <div style="display: flex; gap: 10px;">
-<input type="text" id="pName" placeholder="Name eingeben..." style="flex: 1;">
-                <button class="btn btn-primary" style="width:auto;" onclick="addPlayer()">Hinzufügen</button>
-            </div>
-            <div id="pList" style="margin-top:20px;"></div>
+    <div id="kader-tab" class="container">
+        <h2>📋 Aktueller Kader</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Name</th><th>Beiträge</th><th>Felgen</th><th>Info</th></tr>
+                </thead>
+                <tbody id="kaderBody"></tbody>
+            </table>
         </div>
+    </div>
 
-        <div id="kader-tab" class="container">
-            <h2>📋 Aktueller Kader</h2>
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr><th>Name</th><th>Beiträge</th><th>Felgen</th><th>Geburtstag</th><th>Größe</th></tr>
-                    </thead>
-                    <tbody id="kaderBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="edit-tab" class="container">
-            <h2>📝 Spieler verwalten</h2>
-            <div id="editContainer"></div>
-        </div>
+    <div id="edit-tab" class="container">
+        <h2>📝 Daten verwalten</h2>
+        <div id="editContainer"></div>
     </div>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBMtWxbRPX4hBtBPi-Yn6uYt6I-ud5SyY8",
-        authDomain: "mannschaftsmanager.firebaseapp.com",
-        projectId: "mannschaftsmanager",
-        storageBucket: "mannschaftsmanager.firebasestorage.app",
-        messagingSenderId: "332675116491",
-        appId: "1:332675116491:web:9e0097d48023fb123b5a4e"
-    };
+    // Initialisierung: Daten aus dem Handy-Speicher laden
+    let players = JSON.parse(localStorage.getItem('myLocalTeam')) || [];
+const months = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-    const months = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
-
-    // AUTH LOGIK
-    document.getElementById('loginBtn').onclick = () => {
-        auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value)
-            .catch(err => alert("Fehler: " + err.message));
-    };
-
-    auth.onAuthStateChanged(user => {
-        if(user) {
-            document.getElementById('login-container').style.display = 'none';
-            document.getElementById('app-content').style.display = 'block';
-            syncData();
-        } else {
-            document.getElementById('login-container').style.display = 'block';
-            document.getElementById('app-content').style.display = 'none';
-        }
-    });
-
-    // DATEN LOGIK
-    async function addPlayer() {
+    function addPlayer() {
         const name = document.getElementById('pName').value.trim();
         if(!name) return;
-        await db.collection("players").add({
+        players.push({
+            id: Date.now(),
             name: name,
             monthsPaid: [],
             felgen: 0,
             birth: '',
-            size: '',
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            size: ''
         });
         document.getElementById('pName').value = '';
+        saveAndRender();
     }
 
-    function syncData() {
-        db.collection("players").orderBy("createdAt", "asc").onSnapshot(snap => {
-            let players = [];
-            snap.forEach(doc => players.push({id: doc.id, ...doc.data()}));
-            renderAll(players);
-        });
+    function saveAndRender() {
+        // Speichert die Daten dauerhaft im Browser/Handy
+        localStorage.setItem('myLocalTeam', JSON.stringify(players));
+        renderAll();
     }
 
-    function renderAll(players) {
-        // Liste im Hinzufügen-Tab
+    function renderAll() {
+        // Liste im ersten Tab
         document.getElementById('pList').innerHTML = players.map(p => `
-            <div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; color:black;">
-                ${p.name} <button onclick="deletePlayer('${p.id}')" style="color:red; background:none; border:none; cursor:pointer;">Löschen</button>
+            <div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; background:white; margin-bottom:5px; border-radius:8px;">
+                <span style="color:black; font-weight:600;">${p.name}</span>
+                <button class="btn-del" onclick="deletePlayer(${p.id})">Entfernen</button>
             </div>
         `).join('');
 
-        // Kader-Tabelle
+        // Kader Tabelle
         document.getElementById('kaderBody').innerHTML = players.map(p => `
             <tr>
                 <td><strong>${p.name}</strong></td>
-                <td>${months.map((m, i) => `<span class="badge ${(p.monthsPaid || []).includes(i) ? 'paid' : ''}">${m}</span>`).join('')}</td>
-                <td><span style="font-weight:bold; color:#0984e3;">${p.felgen || 0}</span></td>
-                <td>${p.birth || '-'}</td>
-                <td>${p.size || '-'}</td>
+                <td>${months.map((m, i) => `<span class="badge ${p.monthsPaid.includes(i) ? 'paid' : ''}">${m}</span>`).join('')}</td>
+                <td style="color:#0984e3; font-weight:bold;">${p.felgen}</td>
+                <td style="font-size:0.7rem;">${p.birth  '-'} | ${p.size  '-'}</td>
             </tr>
         `).join('');
 
-        // Bearbeiten-Bereich
+        // Bearbeiten Bereich
         document.getElementById('editContainer').innerHTML = players.map(p => `
             <div class="edit-card">
-                <h3 style="margin-top:0;">${p.name}</h3>
-<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                    <div>
-                        <label><strong>Beiträge:</strong></label>
-                        <div class="month-grid">
-                            ${months.map((m, i) => `
-                                <div class="month-item">
-                                    <input type="checkbox" ${(p.monthsPaid || []).includes(i) ? 'checked' : ''} onchange="toggleMonth('${p.id}', ${i})"> ${m}
-                                </div>
-                            `).join('')}
+                <h3 style="margin:0 0 10px 0; color:#2d3436;">${p.name}</h3>
+                <label style="font-size:0.8rem; font-weight:bold;">Beiträge:</label>
+                <div class="month-grid">
+                    ${months.map((m, i) => `
+                        <div class="month-item">
+                            <input type="checkbox" ${p.monthsPaid.includes(i) ? 'checked' : ''} onchange="toggleMonth(${p.id}, ${i})"> ${m}
                         </div>
-                    </div>
-                    <div>
-                        <label><strong>Felgen:</strong> (${p.felgen || 0})</label>
-                        <div class="felgen-box">
-                            <input type="number" id="add-${p.id}" placeholder="+" style="width:50px;">
-                            <button class="btn btn-add-val" onclick="addFelgen('${p.id}')">OK</button>
-                            <input type="number" value="${p.felgen || 0}" onchange="updateField('${p.id}', 'felgen', parseInt(this.value))" style="width:60px; background:#f1f3f5;">
-                        </div>
-                        <div style="margin-top:15px; display:flex; gap:5px;">
-                            <input type="date" value="${p.birth || ''}" onchange="updateField('${p.id}', 'birth', this.value)" style="width:130px;">
-                            <input type="text" value="${p.size || ''}" onchange="updateField('${p.id}', 'size', this.value)" placeholder="Größe" style="width:80px;">
-                        </div>
-                    </div>
+                    `).join('')}
+                </div>
+                <div class="felgen-box">
+                    <input type="number" id="add-${p.id}" placeholder="+ Felgen" style="width:70px;">
+                    <button class="btn btn-add-val" onclick="addFelgen(${p.id})">Add</button>
+                    <input type="date" value="${p.birth}" onchange="updateField(${p.id}, 'birth', this.value)" style="width:110px;">
+                    <input type="text" value="${p.size}" onchange="updateField(${p.id}, 'size', this.value)" placeholder="Größe" style="width:60px;">
                 </div>
             </div>
         `).join('');
     }
 
-    // FIREBASE AKTIONEN
-    async function toggleMonth(id, monthIdx) {
-        const ref = db.collection("players").doc(id);
-        const doc = await ref.get();
-        let paid = doc.data().monthsPaid || [];
-        if(paid.includes(monthIdx)) paid = paid.filter(m => m !== monthIdx);
-        else paid.push(monthIdx);
-        await ref.update({monthsPaid: paid});
+    function toggleMonth(id, mIdx) {
+        let p = players.find(x => x.id === id);
+        let pos = p.monthsPaid.indexOf(mIdx);
+        if(pos > -1) p.monthsPaid.splice(pos, 1);
+        else p.monthsPaid.push(mIdx);
+        saveAndRender();
     }
 
-    async function addFelgen(id) {
-        const val = parseInt(document.getElementById(`add-${id}`).value);
-        if(isNaN(val)) return;
-        const ref = db.collection("players").doc(id);
-        const doc = await ref.get();
-        await ref.update({felgen: (doc.data().felgen || 0) + val});
+    function addFelgen(id) {
+        let input = document.getElementById(`add-${id}`);
+        let val = parseInt(input.value);
+        if(!isNaN(val)) {
+            players.find(x => x.id === id).felgen += val;
+            input.value = '';
+            saveAndRender();
+        }
     }
 
-    async function updateField(id, field, val) {
-        await db.collection("players").doc(id).update({[field]: val});
+    function updateField(id, field, val) {
+        players.find(x => x.id === id)[field] = val;
+        localStorage.setItem('myLocalTeam', JSON.stringify(players));
+        // Kein komplettes Render nötig, um Tastatur-Fokus nicht zu verlieren
     }
 
-    async function deletePlayer(id) {
-        if(confirm("Löschen?")) await db.collection("players").doc(id).delete();
+    function deletePlayer(id) {
+        if(confirm("Spieler wirklich löschen?")) {
+            players = players.filter(x => x.id !== id);
+            saveAndRender();
+        }
     }
 
     function showTab(tabId) {
         document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.
+querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
-        if(tabId === 'add-tab') document.getElementById('t1').classList.add('active');
-        if(tabId === 'kader-tab') document.getElementById('t2').classList.add('active');
-        if(tabId === 'edit-tab') document.getElementById('t3').classList.add('active');
+        event.currentTarget.classList.add('active');
     }
+
+    // Beim Start alles zeichnen
+    renderAll();
 </script>
 </body>
 </html>
