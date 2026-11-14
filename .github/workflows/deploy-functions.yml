@@ -1,0 +1,26 @@
+name: Firebase Cloud Functions bereitstellen
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "functions/**"
+      - "firebase.json"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Abhängigkeiten installieren
+        working-directory: functions
+        run: npm install --omit=dev
+      - name: Cloud Functions bereitstellen
+        run: npx --yes firebase-tools deploy --only functions --project musik-ba5a3 --non-interactive
