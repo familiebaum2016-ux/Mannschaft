@@ -18,7 +18,7 @@ jobs:
           credentials_json: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
       - name: Abhängigkeiten installieren
         working-directory: functions
         run: npm install --omit=dev
