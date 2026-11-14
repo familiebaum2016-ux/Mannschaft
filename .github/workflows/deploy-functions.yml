@@ -23,4 +23,4 @@ jobs:
         working-directory: functions
         run: npm install --omit=dev
       - name: Cloud Functions bereitstellen
-        run: npx --yes firebase-tools deploy --only functions --project musik-ba5a3 --non-interactive
+        run: npx --yes firebase-tools deploy --only functions --project musik-ba5a3 --non-interactive --force
