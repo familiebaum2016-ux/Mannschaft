@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#10110f">
+  <title>NEXT UP — Partywünsche</title>
+  <meta name="description" content="Musikwünsche für deine Spotify-Partyplaylist.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  <style>
+    :root{--ink:#10110f;--paper:#f1efdf;--acid:#d9ff43;--hot:#ff5a36;--blue:#6bc8ff;--muted:#77786f;--line:rgba(16,17,15,.18);--shadow:6px 6px 0 #10110f;--radius:2px}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;min-height:100vh;background:var(--paper);color:var(--ink);font-family:"DM Mono",monospace;font-size:15px;overflow-x:hidden}
+    button,input{font:inherit}
+    button{color:inherit}
+    a{color:inherit}
+    .noise{position:fixed;inset:0;pointer-events:none;z-index:20;opacity:.055;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E")}
+    .topbar{height:68px;padding:0 clamp(18px,4vw,48px);display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--ink);position:relative;z-index:5;background:rgba(241,239,223,.93);backdrop-filter:blur(12px)}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:20px/1 "Archivo Black",sans-serif;letter-spacing:-.06em}
+    .brand-mark{display:grid;place-items:center;width:34px;height:34px;background:var(--ink);color:var(--acid);transform:rotate(-5deg);letter-spacing:0}
+    .live-pill{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:500;letter-spacing:.12em}
+    .live-pill i{width:8px;height:8px;border-radius:50%;background:var(--hot);box-shadow:0 0 0 5px rgba(255,90,54,.16);animation:pulse 1.8s infinite}
+    @keyframes pulse{50%{box-shadow:0 0 0 1px rgba(255,90,54,.1)}}
+    .shell{width:min(1120px,100%);margin:auto;padding:clamp(28px,6vw,76px) clamp(18px,4vw,48px) 80px}
+    .eyebrow{display:flex;align-items:center;gap:9px;font-size:11px;letter-spacing:.16em;font-weight:500;text-transform:uppercase;margin:0 0 18px}
+    .eyebrow:before{content:"";width:28px;height:3px;background:var(--hot)}
+    h1,h2,h3,p{margin-top:0}
+    h1{font:clamp(54px,12vw,138px)/.78 "Archivo Black",sans-serif;letter-spacing:-.085em;margin-bottom:26px;text-transform:uppercase;max-width:980px}
+    h1 .slash{color:var(--hot);display:inline-block;transform:skew(-12deg);margin-left:.04em}
+    h2{font:clamp(31px,7vw,68px)/.9 "Archivo Black",sans-serif;letter-spacing:-.065em;text-transform:uppercase;margin-bottom:18px}
+    h3{font:20px/1.05 "Archivo Black",sans-serif;letter-spacing:-.04em;text-transform:uppercase}
+    .lede{max-width:650px;font-size:clamp(15px,2vw,19px);line-height:1.6;margin-bottom:38px}
+    .hero{position:relative;margin-bottom:52px;animation:rise .55s both}
+    .hero:after{content:"REQUEST LINE • REQUEST LINE • REQUEST LINE •";position:absolute;right:-90px;top:20px;font-size:10px;letter-spacing:.18em;writing-mode:vertical-rl;color:var(--muted)}
+    @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:20px}
+    .panel{grid-column:span 12;border:2px solid var(--ink);background:#f8f6e9;padding:clamp(20px,4vw,34px);box-shadow:var(--shadow);position:relative}
+    .panel-number{position:absolute;right:16px;top:12px;font:42px/1 "Archivo Black",sans-serif;color:transparent;-webkit-text-stroke:1px rgba(16,17,15,.25)}
+    .panel-acid{background:var(--acid)}
+    .panel-dark{background:var(--ink);color:var(--paper);box-shadow:6px 6px 0 var(--hot)}
+    .step-list{display:grid;gap:12px;margin:22px 0 0;padding:0;list-style:none}
+    .step-list li{display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start;line-height:1.45}
+    .step-list b{display:grid;place-items:center;width:27px;height:27px;background:var(--ink);color:var(--acid);font-size:12px}
+    .field{display:grid;gap:8px;margin-top:20px}
+    .field label{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+    .input-wrap{display:flex;border:2px solid var(--ink);background:var(--paper)}
+    input{width:100%;min-width:0;border:0;background:transparent;padding:15px 16px;outline:none;color:var(--ink);font-size:14px}
+    input:focus{box-shadow:inset 0 -4px var(--acid)}
+    .button{border:2px solid var(--ink);background:var(--acid);padding:14px 18px;font-size:12px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;box-shadow:4px 4px 0 var(--ink);transition:.16s ease;display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:50px;text-decoration:none}
+    .button:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+    .button:active{transform:translate(4px,4px);box-shadow:none}
+    .button:disabled{cursor:not-allowed;opacity:.45;filter:grayscale(1);transform:none;box-shadow:4px 4px 0 var(--ink)}
+    .button-dark{background:var(--ink);color:var(--paper);box-shadow:4px 4px 0 var(--hot)}
+    .button-ghost{background:transparent;color:inherit;border-color:currentColor;box-shadow:none}
+    .button-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:24px}
+    .status-line{display:flex;align-items:center;gap:10px;margin:15px 0 0;font-size:12px;line-height:1.4}
+    .status-dot{width:10px;height:10px;background:var(--muted);border-radius:50%;flex:none}
+    .status-dot.ok{background:#27bd67;box-shadow:0 0 0 4px rgba(39,189,103,.15)}
+    .status-dot.bad{background:var(--hot)}
+    .hidden{display:none!important}
+    .qr-stage{display:grid;grid-template-columns:minmax(220px,310px) 1fr;gap:clamp(24px,5vw,50px);align-items:center}
+    .qr-paper{background:#fff;padding:18px;border:2px solid var(--ink);box-shadow:8px 8px 0 var(--hot);aspect-ratio:1;display:grid;place-items:center}
+    #qrcode img,#qrcode canvas{width:100%!important;height:auto!important;display:block}
+    .room-code{display:inline-block;background:var(--acid);color:var(--ink);padding:8px 10px;font:20px/1 "Archivo Black",sans-serif;letter-spacing:.08em;margin:8px 0 18px}
+    .stat-strip{display:grid;grid-template-columns:repeat(3,1fr);border:2px solid var(--ink);margin-top:28px}
+    .stat{padding:17px;border-right:2px solid var(--ink)}
+    .stat:last-child{border:0}.stat b{display:block;font:25px/1 "Archivo Black",sans-serif}.stat small{font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+    .search-hero{max-width:780px;margin:0 auto 34px;text-align:center}
+    .search-hero h1{font-size:clamp(48px,15vw,116px);margin-inline:auto}
+    .search-box{display:flex;border:3px solid var(--ink);box-shadow:7px 7px 0 var(--hot);background:#fff;margin:0 auto 34px;max-width:780px}
+    .search-box input{padding:18px;font-size:16px}
+    .search-box button{border:0;border-left:2px solid var(--ink);background:var(--acid);padding:0 22px;cursor:pointer;font:12px "DM Mono",monospace;font-weight:500;text-transform:uppercase}
+    .results{display:grid;gap:12px;max-width:780px;margin:auto}
+    .track-card{display:grid;grid-template-columns:64px minmax(0,1fr) 54px;align-items:center;gap:15px;border:2px solid var(--ink);background:#faf8ec;padding:9px;animation:rise .3s both;transition:.15s}
+    .track-card:hover{transform:translateX(4px);background:#fff}
+    .track-cover{width:64px;height:64px;object-fit:cover;background:#d6d4c7;filter:saturate(.86)}
+    .track-copy{min-width:0;display:grid;gap:3px}.track-name,.track-artist,.track-album{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.track-name{font-size:14px}.track-artist{font-size:12px}.track-album{font-size:10px;color:var(--muted)}
+    .add-button{width:44px;height:44px;border:2px solid var(--ink);background:var(--acid);cursor:pointer;box-shadow:3px 3px 0 var(--ink);font:26px/1 "Archivo Black",sans-serif;transition:.15s}.add-button:hover{transform:rotate(5deg)}.add-button:disabled{background:#ddd;box-shadow:none}
+    .empty-state{text-align:center;padding:44px 18px;border:2px dashed var(--line);color:var(--muted);line-height:1.6}
+    .ticket{border:2px solid var(--ink);background:var(--acid);padding:28px;max-width:600px;margin:30px auto;text-align:center;box-shadow:var(--shadow);position:relative}.ticket:before,.ticket:after{content:"";position:absolute;top:50%;width:22px;height:22px;background:var(--paper);border:2px solid var(--ink);border-radius:50%}.ticket:before{left:-13px}.ticket:after{right:-13px}.ticket strong{display:block;font:30px/1 "Archivo Black",sans-serif;text-transform:uppercase;margin-bottom:12px}
+    .toast-region{position:fixed;right:18px;bottom:18px;z-index:50;display:grid;gap:10px;width:min(380px,calc(100% - 36px))}
+    .toast{background:var(--ink);color:var(--paper);border-left:7px solid var(--acid);padding:15px 17px;box-shadow:5px 5px 0 rgba(255,90,54,.8);font-size:12px;line-height:1.5;animation:toastIn .25s both}.toast.error{border-color:var(--hot)}@keyframes toastIn{from{opacity:0;transform:translateX(20px)}}
+    .setup-alert{border:2px solid var(--hot);background:#fff0e9;padding:18px;margin-bottom:24px;font-size:12px;line-height:1.6}.setup-alert strong{font-family:"Archivo Black",sans-serif;text-transform:uppercase}
+    .queue-list{display:grid;gap:8px;margin-top:16px}.queue-item{display:grid;grid-template-columns:28px 1fr auto;gap:10px;border-top:1px solid currentColor;padding-top:10px;font-size:11px}.queue-item b{font-family:"Archivo Black",sans-serif}.queue-item em{font-style:normal;opacity:.65}
+    .spinner{width:20px;height:20px;border:2px solid rgba(16,17,15,.2);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite;margin:auto}@keyframes spin{to{transform:rotate(360deg)}}
+    @media(min-width:780px){.panel.half{grid-column:span 6}.panel.eight{grid-column:span 8}.panel.four{grid-column:span 4}}
+    @media(max-width:680px){.hero:after{display:none}.qr-stage{grid-template-columns:1fr}.qr-paper{max-width:280px;margin:auto}.stat-strip{grid-template-columns:1fr}.stat{border-right:0;border-bottom:2px solid var(--ink)}.track-card{grid-template-columns:54px minmax(0,1fr) 48px;gap:10px}.track-cover{width:54px;height:54px}.shell{padding-bottom:50px}.search-box button{padding:0 13px}.topbar{height:60px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="NEXT UP Startseite"><span class="brand-mark">N</span><span>NEXT UP</span></a>
+    <div class="live-pill"><i></i><span id="modeLabel">DJ DESK</span></div>
+  </header>
+
+  <main id="app" class="shell">
+    <section id="djView">
+      <div class="hero">
+        <p class="eyebrow">Deine Party. Ihre Wünsche.</p>
+        <h1>Wer spielt<br>als nächstes<span class="slash">?</span></h1>
+        <p class="lede">Verbinde Spotify, wähle deine Playlist und teile den QR-Code. Gäste suchen im Browser – du behältst die Kontrolle.</p>
+      </div>
+
+      <div id="configAlert" class="setup-alert hidden"><strong>Einrichtung offen.</strong><br>Trage zuerst deine Firebase-Webkonfiguration im markierten Bereich der HTML-Datei ein. Die genauen Schritte stehen in SETUP.md.</div>
+
+      <div class="grid">
+        <section class="panel half" id="spotifyPanel">
+          <span class="panel-number">01</span>
+          <p class="eyebrow">Spotify</p>
+          <h3>Konto verbinden</h3>
+          <p>Nur dein DJ-Browser erhält Zugriff. Gäste sehen weder Konto noch Token.</p>
+          <button id="spotifyLogin" class="button button-dark" type="button">Mit Spotify verbinden <span>↗</span></button>
+          <button id="spotifyLogout" class="button button-ghost hidden" type="button">Verbindung trennen</button>
+          <p class="status-line"><span id="spotifyDot" class="status-dot"></span><span id="spotifyStatus">Nicht verbunden</span></p>
+        </section>
+
+        <section class="panel half panel-acid" id="playlistPanel">
+          <span class="panel-number">02</span>
+          <p class="eyebrow">Playlist</p>
+          <h3>Quelle festlegen</h3>
+          <p>Füge den Link einer Playlist ein, die du besitzt oder gemeinsam bearbeiten darfst.</p>
+          <div class="field">
+            <label for="playlistUrl">Spotify-Playlist-Link</label>
+            <div class="input-wrap"><input id="playlistUrl" type="url" inputmode="url" placeholder="https://open.spotify.com/playlist/…" autocomplete="off"></div>
+          </div>
+          <button id="checkPlaylist" class="button" type="button">Playlist prüfen</button>
+          <p class="status-line"><span id="playlistDot" class="status-dot"></span><span id="playlistStatus">Noch keine Playlist</span></p>
+        </section>
+
+        <section class="panel panel-dark" id="roomSetup">
+          <span class="panel-number">03</span>
+          <div class="grid">
+            <div style="grid-column:span 12">
+              <p class="eyebrow">Partyraum</p>
+              <h2>Leitung öffnen</h2>
+              <p class="lede">Der Raum verbindet die Gästeseite mit diesem Browser. Lass diese Seite während der Party geöffnet.</p>
+              <button id="createRoom" class="button" type="button" disabled>Partyraum erstellen</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="activeRoom" class="panel hidden">
+          <div class="qr-stage">
+            <div class="qr-paper"><div id="qrcode" aria-label="QR-Code zur Gästeseite"></div></div>
+            <div>
+              <p class="eyebrow">Jetzt live</p>
+              <h2>Scan. Search. Play.</h2>
+              <span id="roomCode" class="room-code">———</span>
+              <p id="roomPlaylist">Playlist wird geladen</p>
+              <div class="button-row">
+                <button id="copyGuestLink" class="button" type="button">Gästelink kopieren</button>
+                <button id="closeRoom" class="button button-ghost" type="button">Raum schließen</button>
+              </div>
+              <p class="status-line"><span class="status-dot ok"></span><span>DJ-Seite verarbeitet Suchanfragen und Wünsche</span></p>
+            </div>
+          </div>
+          <div class="stat-strip">
+            <div class="stat"><b id="requestCount">0</b><small>Wünsche</small></div>
+            <div class="stat"><b id="searchCount">0</b><small>Suchen</small></div>
+            <div class="stat"><b id="listenerStatus">LIVE</b><small>Verbindung</small></div>
+          </div>
+          <div id="queueList" class="queue-list"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="guestView" class="hidden">
+      <div class="search-hero">
+        <p class="eyebrow" style="justify-content:center">Live Song Request</p>
+        <h1>Du bist<br><span style="color:var(--hot)">dran.</span></h1>
+        <p id="guestPlaylist" class="lede" style="margin-inline:auto">Partyraum wird geladen …</p>
+      </div>
+      <form id="searchForm" class="search-box" role="search">
+        <input id="searchInput" type="search" maxlength="80" placeholder="Song oder Interpret …" aria-label="Song oder Interpret suchen" autocomplete="off">
+        <button id="searchButton" type="submit">Suchen</button>
+      </form>
+      <div id="guestMessage" class="empty-state">Tippe einen Song oder Interpreten ein.</div>
+      <div id="results" class="results"></div>
+      <div id="requestTicket" class="ticket hidden"><strong>Wunsch sitzt.</strong><p id="ticketCopy">Der Song steht in der Leitung.</p><button id="anotherRequest" class="button button-dark" type="button">Noch einen suchen</button></div>
+    </section>
+  </main>
+
+  <div id="toastRegion" class="toast-region" aria-live="polite"></div>
+
+  <template id="trackTemplate">
+    <article class="track-card">
+      <img class="track-cover" alt="">
+      <div class="track-copy"><strong class="track-name"></strong><span class="track-artist"></span><small class="track-album"></small></div>
+      <button class="add-button" type="button" aria-label="Song wünschen"><span>+</span></button>
+    </article>
+  </template>
+
+  <script type="module">
+    const APP_CONFIG = {
+      spotifyClientId: "spak_fCFRaiUBAHqHDV22UmZzHOiXtP8kuPL0",
+      firebase: {
+        apiKey: "AIzaSyBNvMY6ytaXsXQffQCDo6xPvpTNo-j95rA",
+        authDomain: "musik-ba5a3.firebaseapp.com",
+        databaseURL: "https://musik-ba5a3-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "musik-ba5a3",
+        appId: "1:1098208950414:web:db724ac5a586af60a171df"
+      }
+    };
+
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+    const APP_URL = new URL(".", location.href);
+    APP_URL.search = "";
+    APP_URL.hash = "";
+    const ROOM_ID = new URLSearchParams(location.search).get("room");
+    const TOKEN_KEY = "nextup.spotify.token";
+    const PKCE_KEY = "nextup.spotify.pkce";
+    const ROOM_KEY = "nextup.active.room";
+    const SCOPES = [
+      "user-read-playback-state",
+      "user-read-currently-playing",
+      "user-modify-playback-state",
+      "playlist-read-private",
+      "playlist-modify-public",
+      "playlist-modify-private"
+    ].join(" ");
+
+    const state = {
+      firebase: null,
+      user: null,
+      token: null,
+      playlist: null,
+      roomId: null,
+      roomMeta: null,
+      processedSearches: new Set(),
+      processedRequests: new Set(),
+      requestCount: 0,
+      searchCount: 0,
+      roomUnsubscribers: []
+    };
+
+    function firebaseConfigured() {
+      return Object.values(APP_CONFIG.firebase).every(value => value && !String(value).includes("PASTE_"));
+    }
+
+    function toast(message, type = "ok", duration = 4200) {
+      const node = document.createElement("div");
+      node.className = `toast ${type === "error" ? "error" : ""}`;
+      node.textContent = message;
+      $("#toastRegion").append(node);
+      setTimeout(() => node.remove(), duration);
+    }
+
+    function setStatus(prefix, message, type = "") {
+      $(`#${prefix}Status`).textContent = message;
+      $(`#${prefix}Dot`).className = `status-dot ${type}`;
+    }
+
+    function randomString(length = 48) {
+      const bytes = crypto.getRandomValues(new Uint8Array(length));
+      return [...bytes].map(b => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"[b % 66]).join("");
+    }
+
+    function roomCode() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      const bytes = crypto.getRandomValues(new Uint8Array(6));
+      return [...bytes].map(b => chars[b % chars.length]).join("");
+    }
+
+    async function sha256Base64Url(value) {
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+      return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    }
+
+    function saveToken(token) {
+      token.expires_at = Date.now() + Number(token.expires_in || 3600) * 1000;
+      const previous = JSON.parse(localStorage.getItem(TOKEN_KEY) || "null");
+      if (!token.refresh_token && previous?.refresh_token) token.refresh_token = previous.refresh_token;
+      localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
+      state.token = token;
+    }
+
+    function loadToken() {
+      try { state.token = JSON.parse(localStorage.getItem(TOKEN_KEY) || "null"); }
+      catch { state.token = null; }
+      return state.token;
+    }
+
+    async function loginSpotify() {
+      if (!APP_CONFIG.spotifyClientId || APP_CONFIG.spotifyClientId.includes("PASTE_")) {
+        toast("Spotify Client-ID fehlt in der HTML-Datei.", "error");
+        return;
+      }
+      const verifier = randomString(64);
+      const oauthState = randomString(28);
+      sessionStorage.setItem(PKCE_KEY, JSON.stringify({ verifier, oauthState }));
+      const challenge = await sha256Base64Url(verifier);
+      const params = new URLSearchParams({
+        client_id: APP_CONFIG.spotifyClientId,
+        response_type: "code",
+        redirect_uri: APP_URL.href,
+        scope: SCOPES,
+        code_challenge_method: "S256",
+        code_challenge: challenge,
+        state: oauthState,
+        show_dialog: "true"
+      });
+      location.href = `https://accounts.spotify.com/authorize?${params}`;
+    }
+
+    async function handleSpotifyCallback() {
+      const params = new URLSearchParams(location.search);
+      const code = params.get("code");
+      if (!code) return false;
+      const stored = JSON.parse(sessionStorage.getItem(PKCE_KEY) || "null");
+      if (!stored || stored.oauthState !== params.get("state")) throw new Error("Spotify-Anmeldung konnte nicht geprüft werden.");
+      const body = new URLSearchParams({
+        grant_type: "authorization_code",
+        code,
+        redirect_uri: APP_URL.href,
+        client_id: APP_CONFIG.spotifyClientId,
+        code_verifier: stored.verifier
+      });
+      const response = await fetch("https://accounts.spotify.com/api/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body
+      });
+      if (!response.ok) throw new Error("Spotify hat die Anmeldung abgelehnt. Prüfe die Redirect URI.");
+      saveToken(await response.json());
+      sessionStorage.removeItem(PKCE_KEY);
+      history.replaceState({}, "", APP_URL.href);
+      return true;
+    }
+
+    async function refreshSpotifyToken() {
+      if (!state.token?.refresh_token) throw new Error("Spotify-Verbindung ist abgelaufen. Bitte erneut verbinden.");
+      const body = new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: state.token.refresh_token,
+        client_id: APP_CONFIG.spotifyClientId
+      });
+      const response = await fetch("https://accounts.spotify.com/api/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body
+      });
+      if (!response.ok) throw new Error("Spotify-Verbindung konnte nicht erneuert werden.");
+      saveToken(await response.json());
+    }
+
+    async function spotifyFetch(path, options = {}, retry = true) {
+      if (!state.token) throw new Error("Spotify ist nicht verbunden.");
+      if (Date.now() > state.token.expires_at - 60000) await refreshSpotifyToken();
+      const headers = new Headers(options.headers || {});
+      headers.set("Authorization", `Bearer ${state.token.access_token}`);
+      if (options.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+      const response = await fetch(`https://api.spotify.com/v1${path}`, { ...options, headers });
+      if (response.status === 401 && retry) {
+        await refreshSpotifyToken();
+        return spotifyFetch(path, options, false);
+      }
+      if (!response.ok) {
+        let detail = "";
+        try { detail = (await response.json())?.error?.message || ""; } catch {}
+        const error = new Error(detail || `Spotify-Fehler ${response.status}`);
+        error.status = response.status;
+        throw error;
+      }
+      if (response.status === 204) return null;
+      return response.json();
+    }
+
+    async function initFirebase() {
+      if (!firebaseConfigured()) return null;
+      const [appModule, authModule, dbModule] = await Promise.all([
+        import("https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"),
+        import("https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js")
+      ]);
+      const app = appModule.initializeApp(APP_CONFIG.firebase);
+      const auth = authModule.getAuth(app);
+      await authModule.signInAnonymously(auth);
+      const db = dbModule.getDatabase(app);
+      state.user = auth.currentUser;
+      state.firebase = { ...dbModule, db };
+      return state.firebase;
+    }
+
+    function parsePlaylistId(input) {
+      const value = input.trim();
+      const match = value.match(/(?:playlist[/:])([A-Za-z0-9]{10,})/);
+      return match?.[1] || (/^[A-Za-z0-9]{10,}$/.test(value) ? value : null);
+    }
+
+    function compactTrack(track) {
+      return {
+        id: track.id,
+        uri: track.uri,
+        name: track.name,
+        artist: (track.artists || []).map(a => a.name).join(", "),
+        album: track.album?.name || "",
+        image: track.album?.images?.at(-1)?.url || track.album?.images?.[0]?.url || "",
+        durationMs: track.duration_ms || 0
+      };
+    }
+    function updateDjReadiness() {
+      const connected = Boolean(state.token);
+      $("#spotifyLogin").classList.toggle("hidden", connected);
+      $("#spotifyLogout").classList.toggle("hidden", !connected);
+      if (connected) setStatus("spotify", "Verbunden – bereit für die Party", "ok");
+      else setStatus("spotify", "Nicht verbunden");
+      $("#createRoom").disabled = !(connected && state.playlist && state.firebase);
+    }
+
+    async function verifySpotifyConnection() {
+      loadToken();
+      if (!state.token) return updateDjReadiness();
+      try {
+        const profile = await spotifyFetch("/me");
+        setStatus("spotify", `Verbunden als ${profile.display_name || profile.id}`, "ok");
+        $("#spotifyLogin").classList.add("hidden");
+        $("#spotifyLogout").classList.remove("hidden");
+      } catch (error) {
+        localStorage.removeItem(TOKEN_KEY);
+        state.token = null;
+        setStatus("spotify", error.message, "bad");
+      }
+      updateDjReadiness();
+    }
+
+    async function checkPlaylist() {
+      const id = parsePlaylistId($("#playlistUrl").value);
+      if (!id) return setStatus("playlist", "Bitte einen gültigen Spotify-Playlist-Link einfügen", "bad");
+      if (!state.token) return toast("Verbinde zuerst Spotify.", "error");
+      const button = $("#checkPlaylist");
+      button.disabled = true;
+      button.textContent = "Wird geprüft …";
+      try {
+        const playlist = await spotifyFetch(`/playlists/${encodeURIComponent(id)}`);
+        state.playlist = { id: playlist.id, name: playlist.name, image: playlist.images?.[0]?.url || "", total: playlist.items?.total ?? 0 };
+        setStatus("playlist", `${playlist.name} · ${state.playlist.total} Songs`, "ok");
+        localStorage.setItem("nextup.playlist.url", $("#playlistUrl").value.trim());
+      } catch (error) {
+        state.playlist = null;
+        setStatus("playlist", error.status === 404 ? "Playlist nicht gefunden oder nicht freigegeben" : error.message, "bad");
+      } finally {
+        button.disabled = false;
+        button.textContent = "Playlist prüfen";
+        updateDjReadiness();
+      }
+    }
+
+    async function createPartyRoom() {
+      if (!state.firebase || !state.playlist || !state.user) return;
+      const { ref, set } = state.firebase;
+      const id = roomCode();
+      const meta = {
+        hostUid: state.user.uid,
+        playlistId: state.playlist.id,
+        playlistName: state.playlist.name,
+        playlistImage: state.playlist.image || "",
+        active: true,
+        createdAt: Date.now()
+      };
+      $("#createRoom").disabled = true;
+      try {
+        await set(ref(state.firebase.db, `rooms/${id}/meta`), meta);
+        state.roomId = id;
+        state.roomMeta = meta;
+        localStorage.setItem(ROOM_KEY, JSON.stringify({ id, playlist: state.playlist }));
+        showActiveRoom();
+        listenToRoom();
+        toast("Partyraum ist live.");
+      } catch (error) {
+        toast(`Raum konnte nicht erstellt werden: ${error.message}`, "error");
+        updateDjReadiness();
+      }
+    }
+
+    function guestUrl(roomId = state.roomId) {
+      const url = new URL(APP_URL.href);
+      url.searchParams.set("room", roomId);
+      return url.href;
+    }
+
+    function showActiveRoom() {
+      $("#activeRoom").classList.remove("hidden");
+      $("#roomSetup").classList.add("hidden");
+      $("#roomCode").textContent = state.roomId;
+      $("#roomPlaylist").textContent = `Wünsche für „${state.roomMeta?.playlistName || state.playlist?.name}“`;
+      $("#qrcode").replaceChildren();
+      if (window.QRCode) {
+        new QRCode($("#qrcode"), { text: guestUrl(), width: 280, height: 280, colorDark: "#10110f", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M });
+      } else {
+        $("#qrcode").textContent = guestUrl();
+      }
+      $("#activeRoom").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function addQueueRow(track, status = "Wird verarbeitet") {
+      const row = document.createElement("div");
+      row.className = "queue-item";
+      const number = document.createElement("b");
+      number.textContent = String(state.requestCount).padStart(2, "0");
+      const title = document.createElement("span");
+      title.textContent = `${track.name} — ${track.artist}`;
+      const label = document.createElement("em");
+      label.textContent = status;
+      row.append(number, title, label);
+      $("#queueList").prepend(row);
+      return label;
+    }
+
+    async function findInsertionPosition(currentTrackId) {
+      if (!currentTrackId) return null;
+      if (state.insertion?.currentTrackId === currentTrackId && state.insertion?.playlistId === state.playlist.id) {
+        return state.insertion.basePosition + state.insertion.insertedUris.length;
+      }
+      let offset = 0;
+      while (offset < 1000) {
+        const page = await spotifyFetch(`/playlists/${encodeURIComponent(state.playlist.id)}/items?limit=50&offset=${offset}`);
+        const items = page.items || [];
+        const index = items.findIndex(entry => (entry.item || entry.track)?.id === currentTrackId);
+        if (index >= 0) {
+          state.insertion = { currentTrackId, playlistId: state.playlist.id, basePosition: offset + index + 1, insertedUris: [] };
+          return state.insertion.basePosition;
+        }
+        if (!page.next || !items.length) break;
+        offset += items.length;
+      }
+      return null;
+    }
+
+    async function processSearch(searchId, payload) {
+      if (payload.status !== "pending" || state.processedSearches.has(searchId)) return;
+      state.processedSearches.add(searchId);
+      state.searchCount += 1;
+      $("#searchCount").textContent = state.searchCount;
+      const { ref, update } = state.firebase;
+      try {
+        const data = await spotifyFetch(`/search?type=track&limit=10&q=${encodeURIComponent(payload.query)}`);
+        const results = (data.tracks?.items || []).filter(Boolean).map(compactTrack);
+        await update(ref(state.firebase.db, `rooms/${state.roomId}/searches/${searchId}`), { status: "done", results, completedAt: Date.now() });
+      } catch (error) {
+        await update(ref(state.firebase.db, `rooms/${state.roomId}/searches/${searchId}`), { status: "error", error: error.message, completedAt: Date.now() });
+        if (error.status === 401) toast("Spotify muss neu verbunden werden.", "error");
+      }
+    }
+
+    async function processRequest(requestId, payload) {
+      if (payload.status !== "pending" || state.processedRequests.has(requestId)) return;
+      state.processedRequests.add(requestId);
+      state.requestCount += 1;
+      $("#requestCount").textContent = state.requestCount;
+      const track = payload.track;
+      const rowLabel = addQueueRow(track);
+      const { ref, update } = state.firebase;
+      let playlistAdded = false;
+      let queued = false;
+      let note = "";
+      try {
+        const playback = await spotifyFetch("/me/player/currently-playing");
+        const currentId = playback?.item?.id || null;
+        const currentPlaylistId = playback?.context?.type === "playlist" ? playback.context.uri?.split(":").at(-1) : null;
+        let position = currentPlaylistId === state.playlist.id ? await findInsertionPosition(currentId) : null;
+        const body = { uris: [track.uri] };
+        if (position !== null) body.position = position;
+        await spotifyFetch(`/playlists/${encodeURIComponent(state.playlist.id)}/items`, { method: "POST", body: JSON.stringify(body) });
+        playlistAdded = true;
+        if (position !== null) state.insertion.insertedUris.push(track.uri);
+        else note = "Playlist war nicht die aktive Wiedergabe; Song wurde angehängt. ";
+        try {
+          await spotifyFetch(`/me/player/queue?uri=${encodeURIComponent(track.uri)}`, { method: "POST" });
+          queued = true;
+        } catch (queueError) {
+          note += "Keine aktive Spotify-Wiedergabe gefunden.";
+        }
+        const status = queued ? "queued" : "playlist_only";
+        await update(ref(state.firebase.db, `rooms/${state.roomId}/requests/${requestId}`), { status, playlistAdded, queued, note, completedAt: Date.now() });
+        rowLabel.textContent = queued ? "Als Nächstes vorgemerkt" : "In Playlist gespeichert";
+      } catch (error) {
+        rowLabel.textContent = "Fehler";
+        await update(ref(state.firebase.db, `rooms/${state.roomId}/requests/${requestId}`), { status: "error", error: error.message, playlistAdded, queued, completedAt: Date.now() });
+        toast(`${track.name}: ${error.message}`, "error");
+      }
+    }
+
+    function listenToRoom() {
+      stopRoomListeners();
+      const { ref, onChildAdded, onValue } = state.firebase;
+      state.roomUnsubscribers.push(
+        onChildAdded(ref(state.firebase.db, `rooms/${state.roomId}/searches`), snap => processSearch(snap.key, snap.val())),
+        onChildAdded(ref(state.firebase.db, `rooms/${state.roomId}/requests`), snap => processRequest(snap.key, snap.val())),
+        onValue(ref(state.firebase.db, ".info/connected"), snap => {
+          $("#listenerStatus").textContent = snap.val() ? "LIVE" : "OFF";
+        })
+      );
+    }
+
+    function stopRoomListeners() {
+      state.roomUnsubscribers.forEach(unsubscribe => unsubscribe?.());
+      state.roomUnsubscribers = [];
+    }
+
+    async function closeRoom() {
+      if (!state.roomId || !state.firebase) return;
+      const { ref, update } = state.firebase;
+      await update(ref(state.firebase.db, `rooms/${state.roomId}/meta`), { active: false, closedAt: Date.now() });
+      stopRoomListeners();
+      localStorage.removeItem(ROOM_KEY);
+      state.roomId = null;
+      state.roomMeta = null;
+      $("#activeRoom").classList.add("hidden");
+      $("#roomSetup").classList.remove("hidden");
+      updateDjReadiness();
+      toast("Partyraum wurde geschlossen.");
+    }
+    async function initGuest() {
+      $("#djView").classList.add("hidden");
+      $("#guestView").classList.remove("hidden");
+      $("#modeLabel").textContent = "SONG REQUEST";
+      if (!state.firebase) {
+        $("#guestMessage").textContent = "Diese Seite ist noch nicht vollständig eingerichtet.";
+        $("#searchInput").disabled = true;
+        $("#searchButton").disabled = true;
+        return;
+      }
+      const { ref, get } = state.firebase;
+      const snapshot = await get(ref(state.firebase.db, `rooms/${ROOM_ID}/meta`));
+      if (!snapshot.exists() || snapshot.val().active !== true) {
+        $("#guestPlaylist").textContent = "Dieser Partyraum ist nicht mehr aktiv.";
+        $("#guestMessage").textContent = "Bitte frage den DJ nach dem aktuellen QR-Code.";
+        $("#searchInput").disabled = true;
+        $("#searchButton").disabled = true;
+        return;
+      }
+      state.roomId = ROOM_ID;
+      state.roomMeta = snapshot.val();
+      $("#guestPlaylist").textContent = `Wünsche für „${state.roomMeta.playlistName}“`;
+      $("#guestMessage").textContent = "Tippe einen Song oder Interpreten ein.";
+    }
+
+    function renderResults(tracks) {
+      const container = $("#results");
+      container.replaceChildren();
+      if (!tracks.length) {
+        $("#guestMessage").classList.remove("hidden");
+        $("#guestMessage").textContent = "Keine Treffer. Versuche einen anderen Suchbegriff.";
+        return;
+      }
+      $("#guestMessage").classList.add("hidden");
+      tracks.forEach((track, index) => {
+        const card = $("#trackTemplate").content.firstElementChild.cloneNode(true);
+        card.style.animationDelay = `${Math.min(index * 35, 260)}ms`;
+        const image = $(".track-cover", card);
+        image.src = track.image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23d9ff43'/%3E%3Cpath d='M25 23h30v34H25z' fill='%2310110f'/%3E%3C/svg%3E";
+        image.alt = `Cover von ${track.name}`;
+        image.referrerPolicy = "no-referrer";
+        $(".track-name", card).textContent = track.name;
+        $(".track-artist", card).textContent = track.artist;
+        $(".track-album", card).textContent = track.album;
+        $(".add-button", card).addEventListener("click", event => submitRequest(track, event.currentTarget));
+        container.append(card);
+      });
+    }
+
+    async function guestSearch(event) {
+      event.preventDefault();
+      const query = $("#searchInput").value.trim();
+      if (query.length < 2) return toast("Bitte mindestens zwei Zeichen eingeben.", "error");
+      if (!state.firebase || !state.roomId) return toast("Partyraum ist nicht verbunden.", "error");
+      const button = $("#searchButton");
+      button.disabled = true;
+      button.textContent = "…";
+      $("#results").replaceChildren();
+      $("#guestMessage").classList.remove("hidden");
+      $("#guestMessage").innerHTML = '<div class="spinner" aria-label="Suche läuft"></div>';
+      const { ref, push, set, onValue } = state.firebase;
+      const searchRef = push(ref(state.firebase.db, `rooms/${state.roomId}/searches`));
+      try {
+        await set(searchRef, { guestUid: state.user.uid, query, status: "pending", createdAt: Date.now() });
+        const timeout = setTimeout(() => {
+          button.disabled = false;
+          button.textContent = "Suchen";
+          $("#guestMessage").textContent = "Der DJ-Browser antwortet noch nicht. Bitte gleich erneut versuchen.";
+        }, 15000);
+        const unsubscribe = onValue(searchRef, snapshot => {
+          const payload = snapshot.val();
+          if (!payload || payload.status === "pending") return;
+          clearTimeout(timeout);
+          unsubscribe();
+          button.disabled = false;
+          button.textContent = "Suchen";
+          if (payload.status === "done") renderResults(payload.results || []);
+          else {
+            $("#guestMessage").textContent = payload.error || "Suche momentan nicht möglich.";
+            toast("Suche fehlgeschlagen. Die DJ-Seite muss geöffnet bleiben.", "error");
+          }
+        });
+      } catch (error) {
+        button.disabled = false;
+        button.textContent = "Suchen";
+        $("#guestMessage").textContent = "Verbindung fehlgeschlagen.";
+        toast(error.message, "error");
+      }
+    }
+
+    async function submitRequest(track, button) {
+      if (button.disabled || !state.firebase || !state.roomId) return;
+      button.disabled = true;
+      button.textContent = "✓";
+      const { ref, push, set, onValue } = state.firebase;
+      const requestRef = push(ref(state.firebase.db, `rooms/${state.roomId}/requests`));
+      try {
+        await set(requestRef, { guestUid: state.user.uid, track, status: "pending", createdAt: Date.now() });
+        $("#results").classList.add("hidden");
+        $("#searchForm").classList.add("hidden");
+        $("#requestTicket").classList.remove("hidden");
+        $("#ticketCopy").textContent = `„${track.name}“ von ${track.artist} wird an den DJ gesendet.`;
+        const unsubscribe = onValue(requestRef, snapshot => {
+          const payload = snapshot.val();
+          if (!payload || payload.status === "pending") return;
+          unsubscribe();
+          if (payload.status === "queued") $("#ticketCopy").textContent = `„${track.name}“ ist in Playlist und Warteschlange.`;
+          else if (payload.status === "playlist_only") $("#ticketCopy").textContent = `„${track.name}“ wurde in die Playlist eingefügt. Spotify war gerade nicht aktiv.`;
+          else {
+            $("#ticketCopy").textContent = payload.error || "Der Wunsch konnte nicht übernommen werden.";
+            toast("Der DJ konnte den Wunsch nicht übernehmen.", "error");
+          }
+        });
+      } catch (error) {
+        button.disabled = false;
+        button.textContent = "+";
+        toast(error.message, "error");
+      }
+    }
+
+    function resetGuestSearch() {
+      $("#requestTicket").classList.add("hidden");
+      $("#searchForm").classList.remove("hidden");
+      $("#results").classList.remove("hidden");
+      $("#results").replaceChildren();
+      $("#guestMessage").classList.remove("hidden");
+      $("#guestMessage").textContent = "Suche den nächsten Song.";
+      $("#searchInput").value = "";
+      $("#searchInput").focus();
+    }
+
+    function bindEvents() {
+      $("#spotifyLogin").addEventListener("click", loginSpotify);
+      $("#spotifyLogout").addEventListener("click", () => {
+        localStorage.removeItem(TOKEN_KEY);
+        state.token = null;
+        updateDjReadiness();
+        toast("Spotify-Verbindung wurde lokal entfernt.");
+      });
+      $("#checkPlaylist").addEventListener("click", checkPlaylist);
+      $("#playlistUrl").addEventListener("keydown", event => { if (event.key === "Enter") checkPlaylist(); });
+      $("#createRoom").addEventListener("click", createPartyRoom);
+      $("#closeRoom").addEventListener("click", closeRoom);
+      $("#copyGuestLink").addEventListener("click", async () => {
+        await navigator.clipboard.writeText(guestUrl());
+        toast("Gästelink kopiert.");
+      });
+      $("#searchForm").addEventListener("submit", guestSearch);
+      $("#anotherRequest").addEventListener("click", resetGuestSearch);
+    }
+
+    async function restoreRoom() {
+      const saved = JSON.parse(localStorage.getItem(ROOM_KEY) || "null");
+      if (!saved?.id || !state.firebase) return;
+      const { ref, get } = state.firebase;
+      const snapshot = await get(ref(state.firebase.db, `rooms/${saved.id}/meta`));
+      if (!snapshot.exists() || !snapshot.val().active || snapshot.val().hostUid !== state.user.uid) {
+        localStorage.removeItem(ROOM_KEY);
+        return;
+      }
+      state.roomId = saved.id;
+      state.roomMeta = snapshot.val();
+      state.playlist = saved.playlist;
+      $("#playlistUrl").value = localStorage.getItem("nextup.playlist.url") || "";
+      setStatus("playlist", `${state.playlist.name} · wiederhergestellt`, "ok");
+      showActiveRoom();
+      listenToRoom();
+    }
+
+    async function boot() {
+      bindEvents();
+      if (!firebaseConfigured()) $("#configAlert").classList.remove("hidden");
+      try { await initFirebase(); }
+      catch (error) { toast(`Firebase: ${error.message}`, "error"); }
+
+      if (ROOM_ID) {
+        try { await initGuest(); }
+        catch (error) {
+          $("#guestMessage").textContent = error.message;
+          toast(error.message, "error");
+        }
+        return;
+      }
+
+      $("#playlistUrl").value = localStorage.getItem("nextup.playlist.url") || "";
+      try {
+        if (new URLSearchParams(location.search).has("error")) throw new Error("Spotify-Anmeldung wurde abgebrochen.");
+        const connectedNow = await handleSpotifyCallback();
+        if (connectedNow) toast("Spotify ist verbunden.");
+      } catch (error) {
+        toast(error.message, "error");
+        history.replaceState({}, "", APP_URL.href);
+      }
+      await verifySpotifyConnection();
+      await restoreRoom();
+      updateDjReadiness();
+    }
+
+    boot();
+  </script>
+</body>
+</html>
